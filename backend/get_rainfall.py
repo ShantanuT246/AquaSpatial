@@ -1,48 +1,80 @@
 import imdlib as im
 import numpy as np
+import os
 
+def get_rainfall_data(lat, lon, start_year=2023, data_dir='backend'):
+    """
+    Retrieves and processes IMD rainfall data for a specific location and year.
 
-lat = 12.9165
-lon = 79.1325
-file_dir = 'backend'
+    This function downloads the data if not already present, finds the nearest
+    grid point to the given latitude and longitude, and calculates the average
+    rainfall for each of the four quarters and the full year.
 
+    Args:
+        lat (float): The latitude of the location.
+        lon (float): The longitude of the location.
+        start_year (int): The year for which to fetch the data. Defaults to 2023.
+        data_dir (str): The directory to store the downloaded data files.
+                        Defaults to 'backend'.
 
-data = im.open_data('rain', 2023, 2023, file_dir=file_dir)  # Adjust years as needed
-ds = data.get_xarray()
+    Returns:
+        tuple: A tuple in the format (q1_avg, q2_avg, q3_avg, q4_avg, annual_avg),
+               with each value rounded to two decimal places.
+               Returns None if an error occurs during data processing.
+    """
+    try:
+        # Create the data directory if it doesn't exist to avoid errors
+        if not os.path.exists(data_dir):
+            os.makedirs(data_dir)
+            print(f"Created directory: {data_dir}")
 
+        # Open (and download if necessary) the rainfall data for the specified year
+        # Using open_data is efficient as it won't re-download if the file exists
+        data = im.open_data('rain', start_year, start_year, file_dir=data_dir)
+        ds = data.get_xarray()
 
-lats = ds['lat'].values
-lons = ds['lon'].values
+        # Get the latitude and longitude arrays from the dataset
+        lats = ds['lat'].values
+        lons = ds['lon'].values
 
+        # Find the index of the grid point closest to the input coordinates
+        lat_idx = (np.abs(lats - lat)).argmin()
+        lon_idx = (np.abs(lons - lon)).argmin()
 
-lat_idx = (np.abs(lats - lat)).argmin()
-lon_idx = (np.abs(lons - lon)).argmin()
+        # Extract the time series data for the identified grid point
+        rain_da = ds['rain']
+        rain_series = rain_da.isel(lat=lat_idx, lon=lon_idx).to_numpy()
 
+        # Define the number of days in each month for a non-leap year
+        # The imdlib data is daily, so we can split it by day counts.
+        days_in_months = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 
-rain_da = ds['rain']
-rain_series = rain_da.isel(lat=lat_idx, lon=lon_idx).to_numpy()
+        # Calculate the cumulative day number at the end of each quarter
+        q1_end = sum(days_in_months[:3])  # End of Q1 (Mar)
+        q2_end = sum(days_in_months[:6])  # End of Q2 (Jun)
+        q3_end = sum(days_in_months[:9])  # End of Q3 (Sep)
 
+        # Calculate the mean rainfall for each quarter and the entire year
+        # [0:q1_end] -> Jan, Feb, Mar
+        # [q1_end:q2_end] -> Apr, May, Jun
+        # [q2_end:q3_end] -> Jul, Aug, Sep
+        # [q3_end:] -> Oct, Nov, Dec
+        q1_avg = np.mean(rain_series[0:q1_end])
+        q2_avg = np.mean(rain_series[q1_end:q2_end])
+        q3_avg = np.mean(rain_series[q2_end:q3_end])
+        q4_avg = np.mean(rain_series[q3_end:])
+        annual_avg = np.mean(rain_series)
 
-# print(type(rain_series))  # <class 'numpy.ndarray'>
-# print(rain_series[:5])    # sample values from time series
+        # Format the result as a tuple of rounded values
+        result = (
+            round(q1_avg, 2),
+            round(q2_avg, 2),
+            round(q3_avg, 2),
+            round(q4_avg, 2),
+            round(annual_avg, 2)
+        )
+        return result
 
-
-days_in_months = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
-q1 = sum(days_in_months[:3])
-q2 = sum(days_in_months[:6])
-q3 = sum(days_in_months[:9])
-
-
-q1_avg = np.mean(rain_series[:q1])
-q2_avg = np.mean(rain_series[q1:q2])
-q3_avg = np.mean(rain_series[q2:q3])
-q4_avg = np.mean(rain_series[q3:])
-annual_avg = np.mean(rain_series)
-
-
-result = (round(q1_avg, 2), round(q2_avg, 2), round(q3_avg, 2), round(q4_avg, 2), round(annual_avg, 2))
-print(result)
-
-
-# # data = im.get_data('rain',start_yr=2023,end_yr=2023)
-# # command to download yearwise data
+    except Exception as e:
+        print(f"An error occurred while processing data for lat={lat}, lon={lon}: {e}")
+        return None
