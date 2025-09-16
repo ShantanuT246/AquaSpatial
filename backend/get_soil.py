@@ -1,80 +1,102 @@
 import rasterio
 from pyproj import CRS, Transformer
-import numpy as np
 
-tif_file = "datasets/SOILTEXTURE.tif"
+# --- Constants defined at the top for clarity and easy modification ---
 
-# This dictionary holds the official legend from your Raster Attribute Table.
-# It makes the output human-readable.
-SOIL_LEGEND = {
-    4: "Rocky and non soil",
-    3: "Coarse Texture (Loamy sand, sand)",
-    2: "Medium texture (Loam, silt loam, silt, sandy loam)",
-    1: "Fine texture (Loamy clay, Clay, sandy clay, etc.)",
-    0: "DATA NOT AVAILABLE"
+# Define the path to your GeoTIFF file.
+# Ensure this path is correct relative to where you run your script.
+TIF_FILE_PATH = "datasets/SOILTEXTURE.tif"
+
+# This new dictionary maps the raw pixel values directly to the simplified,
+# single-word output strings as requested.
+SIMPLIFIED_SOIL_MAP = {
+    4: "other",          # Official description: "Rocky and non soil"
+    3: "sandy",          # Official description: "Coarse Texture"
+    2: "loamy",          # Official description: "Medium texture"
+    1: "clay",           # Official description: "Fine texture"
+    0: "other"           # Official description: "DATA NOT AVAILABLE"
 }
 
-def get_point_value(tif_path, lat, lon):
+def get_soil_type(lat, lon):
     """
-    Samples a GeoTIFF raster at a specific latitude and longitude to get the raw pixel value.
+    Performs a complete analysis for a single point, returning a simplified soil type.
+
+    This all-in-one function takes latitude and longitude, finds the corresponding
+    pixel in the GeoTIFF, and returns a simple, human-readable soil category.
 
     Args:
-        tif_path (str): The full path to the GeoTIFF file.
         lat (float): The latitude of the point to sample (e.g., 15.9165).
         lon (float): The longitude of the point to sample (e.g., 80.1325).
 
     Returns:
-        int: The integer pixel value at the given location. Returns the raster's nodata
-             value if the point is outside the raster's extent or an error occurs.
+        str: A string representing the simplified soil type: 'clay', 'sandy',
+             'loamy', or 'other' if the data is not available, rocky, or an
+             error occurs.
     """
     try:
-        with rasterio.open(tif_path) as src:
+        # Step 1: Open the raster file
+        with rasterio.open(TIF_FILE_PATH) as src:
+            
+            # Step 2: Define coordinate systems
             # The CRS for standard latitude/longitude is WGS84 (EPSG:4326)
             wgs84 = CRS.from_epsg(4326)
-            
-            # Get the raster's own coordinate reference system
+            # Get the raster's own coordinate reference system from the file
             raster_crs = src.crs
 
-            # If the raster and the input coordinates are in different systems, transform the point
-            if raster_crs != wgs84:
-                transformer = Transformer.from_crs(wgs84, raster_crs, always_xy=True)
-                x, y = transformer.transform(lon, lat)
-            else:
-                x, y = lon, lat # The raster is already in WGS84
+            # Step 3: Transform the input coordinates to the raster's coordinate system
+            # This is a crucial step for accuracy.
+            transformer = Transformer.from_crs(wgs84, raster_crs, always_xy=True)
+            x, y = transformer.transform(lon, lat)
 
-            # The sample method returns a generator. We get the first (and only) item.
-            # It returns a numpy array, so we select the first element [0] to get the scalar value.
-            value_array = next(src.sample([(x, y)], indexes=1))
+            # Step 4: Sample the raster at the transformed coordinates
+            # The 'sample' method returns a generator; 'next' gets the first value.
+            # The result is a numpy array, so we select the first element [0].
+            pixel_value = int(next(src.sample([(x, y)], indexes=1))[0])
             
-            # Ensure the return value is a standard Python integer
-            return int(value_array[0])
+            # Step 5: Look up the simplified description using the map
+            # The .get() method safely returns a default value ('other') if the
+            # pixel_value is not found in the dictionary keys.
+            soil_type = SIMPLIFIED_SOIL_MAP.get(pixel_value, "other")
+            
+            return soil_type
 
     except Exception as e:
-        print(f"An error occurred: {e}")
-        # In case of any error, it's safer to return a value indicating no data.
-        # You can get the specific nodata value from the raster if needed.
-        return -1 # Or src.nodata
+        # If any error occurs (e.g., file not found, point outside raster bounds),
+        # print the error and return the default 'other' category.
+        print(f"An error occurred for coordinates ({lat}, {lon}): {e}")
+        return "other"
 
-def get_point_description(tif_path, lat, lon):
-    """
-    Samples a GeoTIFF and returns both the raw value and its human-readable description.
+# This block allows you to test the function by running this file directly.
+# It will NOT run if you import the function into another script.
+# if __name__ == '__main__':
+#     print("--- Testing the get_simplified_soil_type function ---")
 
-    This is the recommended function to use for getting meaningful output.
+#     # Test Case 1: Andhra Pradesh coast (expected: clay)
+#     lat1, lon1 = 15.9165, 80.1325
+#     soil1 = get_simplified_soil_type(lat1, lon1)
+#     print(f"Location: Andhra Pradesh Coast ({lat1}, {lon1})")
+#     print(f" -> Simplified Soil Type: '{soil1}'\n")
 
-    Args:
-        tif_path (str): The full path to the GeoTIFF file.
-        lat (float): The latitude of the point to sample.
-        lon (float): The longitude of the point to sample.
+#     # Test Case 2: Thar Desert, Rajasthan (expected: sandy)
+#     lat2, lon2 = 26.9124, 70.9083
+#     soil2 = get_simplified_soil_type(lat2, lon2)
+#     print(f"Location: Thar Desert ({lat2}, {lon2})")
+#     print(f" -> Simplified Soil Type: '{soil2}'\n")
 
-    Returns:
-        tuple: A tuple containing (pixel_value, description_string).
-               For example: (1, "Fine texture (Loamy clay, Clay, sandy clay, etc.)")
-    """
-    # First, get the raw numerical value from the raster
-    pixel_value = get_point_value(tif_path, lat, lon)
+#     # Test Case 3: Indo-Gangetic Plain, near Delhi (expected: loamy)
+#     lat3, lon3 = 28.6139, 77.2090
+#     soil3 = get_simplified_soil_type(lat3, lon3)
+#     print(f"Location: Near Delhi ({lat3}, {lon3})")
+#     print(f" -> Simplified Soil Type: '{soil3}'\n")
+    
+#     # Test Case 4: Himalayas, rocky area (expected: other)
+#     lat4, lon4 = 30.3165, 78.0322
+#     soil4 = get_simplified_soil_type(lat4, lon4)
+#     print(f"Location: Himalayan Region ({lat4}, {lon4})")
+#     print(f" -> Simplified Soil Type: '{soil4}'\n")
 
-    # Then, look up the description for that value in our legend.
-    # The .get() method safely handles cases where the value might not be in the legend.
-    description = SOIL_LEGEND.get(pixel_value, "Unknown or No Data")
-
-    return (pixel_value, description)
+#     # Test Case 5: Northeast India, no data (expected: other)
+#     lat5, lon5 = 27.5141, 96.3653
+#     soil5 = get_simplified_soil_type(lat5, lon5)
+#     print(f"Location: Northeast India ({lat5}, {lon5})")
+#     print(f" -> Simplified Soil Type: '{soil5}'\n")

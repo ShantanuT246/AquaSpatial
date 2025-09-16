@@ -2,3 +2,5 @@ imdlib
 rasterio
 pyproj
 numpy
+shapely
+geopandas

@@ -2,7 +2,7 @@ import imdlib as im
 import numpy as np
 import os
 
-def get_rainfall_data(lat, lon, start_year=2023, data_dir='datasets/Rainfall_ind2023_rfp25.grd'):
+def get_rainfall_data(lat, lon, start_year=2023, data_dir='./datasets'):
     """
     Retrieves and processes IMD rainfall data for a specific location and year.
 
@@ -44,6 +44,8 @@ def get_rainfall_data(lat, lon, start_year=2023, data_dir='datasets/Rainfall_ind
         # Extract the time series data for the identified grid point
         rain_da = ds['rain']
         rain_series = rain_da.isel(lat=lat_idx, lon=lon_idx).to_numpy()
+        # Mask invalid values (e.g., -9999)
+        rain_series = np.where(rain_series < 0, np.nan, rain_series)
 
         # # Define the number of days in each month for a non-leap year
         # # The imdlib data is daily, so we can split it by day counts.
@@ -73,9 +75,9 @@ def get_rainfall_data(lat, lon, start_year=2023, data_dir='datasets/Rainfall_ind
         #     round(q4_avg, 2),
         #     round(annual_avg, 2)
         # )
-        #total anual rainafall
-        annual_avg = np.sum(rain_series)
-        result = round(annual_avg,2)
+        # Total annual rainfall, ignoring NaNs
+        annual_sum = np.nansum(rain_series)
+        result = round(annual_sum, 2)
         return result
 
     except Exception as e:
