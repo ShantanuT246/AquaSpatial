@@ -1,1 +1,4 @@
 imdlib
+rasterio
+pyproj
+numpy

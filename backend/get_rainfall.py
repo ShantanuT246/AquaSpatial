@@ -45,34 +45,37 @@ def get_rainfall_data(lat, lon, start_year=2023, data_dir='backend'):
         rain_da = ds['rain']
         rain_series = rain_da.isel(lat=lat_idx, lon=lon_idx).to_numpy()
 
-        # Define the number of days in each month for a non-leap year
-        # The imdlib data is daily, so we can split it by day counts.
-        days_in_months = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+        # # Define the number of days in each month for a non-leap year
+        # # The imdlib data is daily, so we can split it by day counts.
+        # days_in_months = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 
-        # Calculate the cumulative day number at the end of each quarter
-        q1_end = sum(days_in_months[:3])  # End of Q1 (Mar)
-        q2_end = sum(days_in_months[:6])  # End of Q2 (Jun)
-        q3_end = sum(days_in_months[:9])  # End of Q3 (Sep)
+        # # Calculate the cumulative day number at the end of each quarter
+        # q1_end = sum(days_in_months[:3])  # End of Q1 (Mar)
+        # q2_end = sum(days_in_months[:6])  # End of Q2 (Jun)
+        # q3_end = sum(days_in_months[:9])  # End of Q3 (Sep)
 
-        # Calculate the mean rainfall for each quarter and the entire year
-        # [0:q1_end] -> Jan, Feb, Mar
-        # [q1_end:q2_end] -> Apr, May, Jun
-        # [q2_end:q3_end] -> Jul, Aug, Sep
-        # [q3_end:] -> Oct, Nov, Dec
-        q1_avg = np.mean(rain_series[0:q1_end])
-        q2_avg = np.mean(rain_series[q1_end:q2_end])
-        q3_avg = np.mean(rain_series[q2_end:q3_end])
-        q4_avg = np.mean(rain_series[q3_end:])
-        annual_avg = np.mean(rain_series)
+        # # Calculate the mean rainfall for each quarter and the entire year
+        # # [0:q1_end] -> Jan, Feb, Mar
+        # # [q1_end:q2_end] -> Apr, May, Jun
+        # # [q2_end:q3_end] -> Jul, Aug, Sep
+        # # [q3_end:] -> Oct, Nov, Dec
+        # q1_avg = np.mean(rain_series[0:q1_end])
+        # q2_avg = np.mean(rain_series[q1_end:q2_end])
+        # q3_avg = np.mean(rain_series[q2_end:q3_end])
+        # q4_avg = np.mean(rain_series[q3_end:])
+        # # annual_avg = np.mean(rain_series)
 
-        # Format the result as a tuple of rounded values
-        result = (
-            round(q1_avg, 2),
-            round(q2_avg, 2),
-            round(q3_avg, 2),
-            round(q4_avg, 2),
-            round(annual_avg, 2)
-        )
+        # # Format the result as a tuple of rounded values
+        # result = (
+        #     round(q1_avg, 2),
+        #     round(q2_avg, 2),
+        #     round(q3_avg, 2),
+        #     round(q4_avg, 2),
+        #     round(annual_avg, 2)
+        # )
+        #total anual rainafall
+        annual_avg = np.sum(rain_series)
+        result = round(annual_avg,2)
         return result
 
     except Exception as e:
