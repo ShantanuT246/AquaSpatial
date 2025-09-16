@@ -2,7 +2,7 @@ import imdlib as im
 import numpy as np
 import os
 
-def get_rainfall_data(lat, lon, start_year=2023, data_dir='backend'):
+def get_rainfall_data(lat, lon, start_year=2023, data_dir='datasets/Rainfall_ind2023_rfp25.grd'):
     """
     Retrieves and processes IMD rainfall data for a specific location and year.
 
