@@ -1,0 +1,6 @@
+latitude,longitude,state,annual_rainfall_mm,rainfall_source,soil_type,soil_texture,soil_source,aquifer_depth_m_bgl,aquifer_thickness_m,aquifer_source,drainage_density_km_per_km2,total_stream_length_km,basin_area_km2,drainage_source,analysis_timestamp
+12.9165,79.1325,Tamil Nadu,,Not implemented,,,Not implemented,53.56649,2.849257,India-WRIS Tamil_Nadu,,,,Not implemented,2025-09-17T12:15:50.235728
+13.0827,80.2707,Tamil Nadu,,Not implemented,,,Not implemented,37.445854,56.082436,India-WRIS Tamil_Nadu,,,,Not implemented,2025-09-17T12:15:50.599565
+11.0168,76.9558,Tamil Nadu,,Not implemented,,,Not implemented,59.379101,21.26746,India-WRIS Tamil_Nadu,,,,Not implemented,2025-09-17T12:15:50.985806
+23.2599,77.4126,Madhya Pradesh,,Not implemented,,,Not implemented,23.597748,39.26733,India-WRIS Madhya_Pradesh,,,,Not implemented,2025-09-17T12:15:51.360668
+22.5726,88.3639,West Bengal,,Not implemented,,,Not implemented,111.837997,47.37476,India-WRIS West_Bengal,,,,Not implemented,2025-09-17T12:15:51.686340
