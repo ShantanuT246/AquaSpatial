@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prediction Results | AquaPredict Pro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <!-- Leaflet CSS for the map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <style>
+        /* All the same CSS from predict.html goes here */
+        :root {
+            --primary: #0066cc;
+            --primary-dark: #004999;
+            --primary-light: #4d94ff;
+            --secondary: #00c4cc;
+            --accent: #00cc99;
+            --dark: #0a0a14;
+            --darker: #050510;
+            --light: #f0f6ff;
+            --gray: #6c757d;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            color: var(--light);
+            line-height: 1.6;
+            background: linear-gradient(135deg, var(--darker) 0%, var(--dark) 100%);
+            overflow-x: hidden;
+            min-height: 100vh;
+            padding: 20px;
+            padding-top: 120px;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Centered Navigation Bar */
+        header {
+            display: flex;
+            justify-content: center;
+            position: fixed;
+            top: 20px;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            margin: 0;
+        }
+
+        .nav-container {
+            background: linear-gradient(135deg, rgba(0, 20, 40, 0.4), rgba(0, 40, 80, 0.6));
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            color: white;
+            padding: 15px 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.37);
+            border-radius: 50px;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 40px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            margin-right: 60px;
+            gap: 10px;
+        }
+
+        .logo i {
+            font-size: 1.5rem;
+            color: var(--primary-light);
+        }
+
+        .logo h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-light);
+            margin: 0;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 30px;
+        }
+
+        nav ul li a {
+            color: var(--light);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+            position: relative;
+            padding: 8px 0;
+            font-size: 1.1rem;
+        }
+
+        nav ul li a:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            transition: var(--transition);
+        }
+
+        nav ul li a:hover:after {
+            width: 100%;
+        }
+
+        nav ul li a:hover {
+            color: var(--primary-light);
+        }
+        
+        .section-title {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .section-title h2 {
+            font-size: 2.5rem;
+            color: var(--primary-light);
+            margin-bottom: 20px;
+        }
+
+        .section-title p {
+            color: var(--light);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        /* Results Section */
+        .results-section {
+            padding: 80px 0;
+            animation: fadeIn 0.8s ease;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-bottom: 50px;
+        }
+
+        .result-card {
+            background: linear-gradient(135deg, rgba(0, 30, 60, 0.5) 0%, rgba(0, 20, 40, 0.7) 100%);
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            border-left: 5px solid var(--primary);
+            transition: var(--transition);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(77, 148, 255, 0.2);
+        }
+
+        .result-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        .result-label {
+            font-size: 16px;
+            color: var(--primary-light);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .result-label i {
+            margin-right: 8px;
+            color: var(--primary);
+        }
+
+        .result-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: white;
+            margin: 10px 0;
+        }
+
+        .result-unit {
+            font-size: 14px;
+            color: var(--light);
+        }
+
+        /* Map Section */
+        .map-container {
+            margin-top: 60px;
+        }
+        
+        #result-map {
+            width: 100%;
+            height: 450px;
+            border-radius: 15px;
+            border: 1px solid rgba(77, 148, 255, 0.2);
+            box-shadow: var(--shadow);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+    </style>
+</head>
+<body>
+    <header>
+        <div class="nav-container">
+            <div class="logo">
+                <i class="fas fa-tint"></i>
+                <h1>AquaSpatial</h1>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="predict.html">Home</a></li>
+                    <li><a href="predict.html">Predict</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="results-section" id="results-container">
+            <div class="section-title">
+                <h2>Prediction Results</h2>
+                <p>An analysis of your property's rainwater harvesting potential.</p>
+            </div>
+            
+            <div class="results-grid">
+                <div class="result-card">
+                    <div class="result-label"><i class="fas fa-recycle"></i> Recharge Potential</div>
+                    <div class="result-value" id="recharge-potential-value">...</div>
+                    <div class="result-unit">Liters/year</div>
+                </div>
+                
+                <div class="result-card">
+                    <div class="result-label"><i class="fas fa-star"></i> Suitability Score</div>
+                    <div class="result-value" id="suitability-score-value">...</div>
+                    <div class="result-unit">/ 1.0</div>
+                </div>
+                
+                <div class="result-card">
+                    <div class="result-label"><i class="fas fa-balance-scale"></i> Harvest-Demand Ratio</div>
+                    <div class="result-value" id="hdr-value">...</div>
+                    <div class="result-unit">Ratio</div>
+                </div>
+                
+                <div class="result-card">
+                    <div class="result-label"><i class="fas fa-rupee-sign"></i> Cost Estimation</div>
+                    <div class="result-value" id="cost-value">...</div>
+                    <div class="result-unit">INR</div>
+                </div>
+            </div>
+
+            <div class="map-container">
+                <div class="section-title">
+                    <h2>Analyzed Location</h2>
+                </div>
+                <div id="result-map"></div>
+            </div>
+        </section>
+    </main>
+    
+    <!-- Leaflet JS for the map -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const resultsContainer = document.getElementById('results-container');
+            if (resultsContainer) {
+                const results = JSON.parse(sessionStorage.getItem('predictionResults'));
+
+                if (!results) {
+                    resultsContainer.innerHTML = `
+                        <div class="section-title">
+                            <h2>No Prediction Data Found</h2>
+                            <p>Please return to the prediction page to submit your details.</p>
+                            <a href="predict.html" class="btn btn-primary" style="margin-top: 20px;">Go Back</a>
+                        </div>`;
+                    return;
+                }
+
+                // Populate the data fields
+                document.getElementById('recharge-potential-value').textContent = results.rechargePotential;
+                document.getElementById('suitability-score-value').textContent = results.suitabilityScore;
+                document.getElementById('hdr-value').textContent = results.harvestDemandRatio;
+                document.getElementById('cost-value').textContent = `₹${results.costEstimation}`;
+                
+                // Initialize and display the map
+                const lat = parseFloat(results.latitude);
+                const lon = parseFloat(results.longitude);
+
+                if (!isNaN(lat) && !isNaN(lon)) {
+                    const map = L.map('result-map').setView([lat, lon], 16);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        maxZoom: 19,
+                        attribution: '© OpenStreetMap contributors'
+                    }).addTo(map);
+                    
+                    L.marker([lat, lon]).addTo(map)
+                        .bindPopup('Your Analyzed Location')
+                        .openPopup();
+                } else {
+                    document.getElementById('result-map').innerHTML = "<p style='text-align:center; color: var(--gray);'>Location coordinates were not available.</p>";
+                }
+
+                // Clean up the stored data
+                sessionStorage.removeItem('predictionResults');
+            }
+        });
+    </script>
+</body>
+</html>
