@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AquaPredict Pro | RTRWH Prediction System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Roboto:wght@300;400;500&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0066cc;
+            --primary-dark: #004999;
+            --primary-light: #4d94ff;
+            --secondary: #00c4cc;
+            --accent: #00cc99;
+            --dark: #0a0a14;
+            --darker: #050510;
+            --light: #f0f6ff;
+            --gray: #6c757d;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            color: var(--light);
+            line-height: 1.6;
+            background: linear-gradient(135deg, var(--darker) 0%, var(--dark) 100%);
+            overflow-x: hidden;
+            min-height: 100vh;
+            padding: 20px;
+            padding-top: 120px;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Centered Navigation Bar */
+        header {
+            display: flex;
+            justify-content: center;
+            position: fixed;
+            top: 20px;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            margin: 0;
+        }
+
+        .nav-container {
+            background: linear-gradient(135deg, rgba(0, 20, 40, 0.4), rgba(0, 40, 80, 0.6));
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            color: white;
+            padding: 15px 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.37);
+            border-radius: 50px;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 40px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            margin-right: 60px;
+            gap: 10px;
+        }
+
+        .logo i {
+            font-size: 1.5rem;
+            color: var(--primary-light);
+        }
+
+        .logo h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-light);
+            margin: 0;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 30px;
+        }
+
+        nav ul li a {
+            color: var(--light);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+            position: relative;
+            padding: 8px 0;
+            font-size: 1.1rem;
+        }
+
+        nav ul li a:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            transition: var(--transition);
+        }
+
+        nav ul li a:hover:after {
+            width: 100%;
+        }
+
+        nav ul li a:hover {
+            color: var(--primary-light);
+        }
+
+        /* Prediction Form Section */
+        .prediction-section {
+            padding: 100px 0;
+        }
+
+        .form-container {
+            background: linear-gradient(135deg, rgba(0, 30, 60, 0.5) 0%, rgba(0, 20, 40, 0.7) 100%);
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            padding: 50px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(77, 148, 255, 0.2);
+        }
+
+        .form-title {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .form-title h2 {
+            font-size: 2.2rem;
+            color: var(--primary-light);
+            margin-bottom: 15px;
+        }
+
+        .form-title p {
+            color: var(--light);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            /* Default to single column */
+            gap: 25px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--primary-light);
+            display: flex;
+            align-items: center;
+        }
+
+        .form-group label i {
+            margin-right: 10px;
+            color: var(--primary);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 16px 20px;
+            background: rgba(0, 20, 40, 0.6);
+            border: 2px solid rgba(77, 148, 255, 0.3);
+            border-radius: 10px;
+            font-size: 16px;
+            transition: var(--transition);
+            color: var(--light);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.3);
+        }
+
+        .form-control:disabled {
+            cursor: not-allowed;
+            background-color: rgba(0, 20, 40, 0.3);
+        }
+
+        .location-inputs-container {
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        /* --- Live Location Toggle --- */
+        .toggle-group {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0, 20, 40, 0.6);
+            border: 2px solid rgba(77, 148, 255, 0.3);
+            border-radius: 10px;
+            padding: 16px 20px;
+            cursor: pointer;
+        }
+
+        .live-location-container {
+            position: relative;
+            width: 50px;
+            height: 26px;
+            flex-shrink: 0;
+        }
+
+        #live-location-toggle {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-switch-visual {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--gray);
+            transition: .4s;
+            border-radius: 26px;
+        }
+
+        .toggle-switch-visual:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked+.toggle-switch-visual {
+            background-color: var(--primary);
+        }
+
+        input:checked+.toggle-switch-visual:before {
+            transform: translateX(24px);
+        }
+
+        .submit-btn {
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            color: white;
+            padding: 18px 40px;
+            font-size: 18px;
+            border-radius: 50px;
+            margin: 20px auto 0;
+            display: block;
+            width: 100%;
+            max-width: 300px;
+            transition: var(--transition);
+            border: none;
+            cursor: pointer;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 102, 204, 0.4);
+        }
+
+        /* Loading Overlay */
+        #loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(10, 10, 20, 0.9);
+            backdrop-filter: blur(10px);
+            display: none;
+            /* Hidden by default */
+            justify-content: center;
+            align-items: center;
+            z-index: 1001;
+            flex-direction: column;
+        }
+
+        .spinner {
+            border: 8px solid rgba(255, 255, 255, 0.2);
+            border-top: 8px solid var(--primary-light);
+            border-radius: 50%;
+            width: 80px;
+            height: 80px;
+            animation: spin 1.5s linear infinite;
+        }
+
+        #loading-overlay p {
+            margin-top: 25px;
+            font-size: 1.2rem;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="nav-container">
+            <div class="logo">
+                <i class="fas fa-tint"></i>
+                <h1>AquaSpatial</h1>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="predict.html">Predict</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="prediction-section" id="predict">
+            <div class="form-container">
+                <div class="form-title">
+                    <h2>Rainwater Harvesting Prediction</h2>
+                    <p>Enter your property details to analyze rainwater harvesting potential</p>
+                </div>
+                <form id="predict-form" class="form-grid" novalidate>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="rooftop_area"><i class="fas fa-ruler-combined"></i> Rooftop Area (m²)</label>
+                            <input type="number" id="rooftop_area" name="rooftop_area" required class="form-control"
+                                placeholder="e.g., 120">
+                        </div>
+                        <div class="form-group">
+                            <label for="dwellers"><i class="fas fa-users"></i> Number of Dwellers</label>
+                            <input type="number" id="dwellers" name="dwellers" required class="form-control"
+                                placeholder="e.g., 4">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="roof_material"><i class="fas fa-layer-group"></i> Roof Material</label>
+                        <select id="roof_material" name="roof_material" required class="form-control">
+                            <option value="" disabled selected>Select a material...</option>
+                            <option value="metal">Metal</option>
+                            <option value="tile">Tiles</option>
+                            <option value="concrete">Concrete</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="toggle-group">
+                            <label for="live-location-toggle" style="cursor: pointer;"><i
+                                    class="fas fa-map-marker-alt"></i> Use Live Location</label>
+                            <div class="live-location-container">
+                                <input type="checkbox" id="live-location-toggle" checked>
+                                <label for="live-location-toggle" class="toggle-switch-visual"></label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-row location-inputs-container" id="location-inputs">
+                        <div class="form-group">
+                            <label for="latitude-input"><i class="fas fa-globe-americas"></i> Latitude</label>
+                            <input type="text" id="latitude-input" name="latitude" class="form-control"
+                                placeholder="Disabled when toggle is on">
+                        </div>
+                        <div class="form-group">
+                            <label for="longitude-input"><i class="fas fa-globe-asia"></i> Longitude</label>
+                            <input type="text" id="longitude-input" name="longitude" class="form-control"
+                                placeholder="Disabled when toggle is on">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn submit-btn" id="submit-button"><i class="fas fa-calculator"></i>
+                        Calculate Prediction</button>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <!-- Loading Overlay HTML -->
+    <div id="loading-overlay">
+        <div class="spinner"></div>
+        <p>Analyzing your location... This may take up to 20 seconds.</p>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const form = document.getElementById('predict-form');
+            const toggle = document.getElementById('live-location-toggle');
+            const latInput = document.getElementById('latitude-input');
+            const lonInput = document.getElementById('longitude-input');
+            const locationInputsContainer = document.getElementById('location-inputs');
+            const loadingOverlay = document.getElementById('loading-overlay');
+
+            const updateInputState = () => {
+                const isLive = toggle.checked;
+                latInput.disabled = isLive;
+                lonInput.disabled = isLive;
+                latInput.required = !isLive;
+                lonInput.required = !isLive;
+
+                locationInputsContainer.style.opacity = isLive ? '0.5' : '1';
+                locationInputsContainer.style.pointerEvents = isLive ? 'none' : 'auto';
+
+                if (isLive) {
+                    latInput.value = '';
+                    lonInput.value = '';
+                }
+            };
+
+            toggle.addEventListener('change', updateInputState);
+
+            form.addEventListener('submit', (event) => {
+                event.preventDefault();
+                if (!form.checkValidity()) {
+                    form.reportValidity();
+                    return;
+                }
+
+                if (toggle.checked) {
+                    if (!navigator.geolocation) {
+                        return alert("Geolocation is not supported by your browser.");
+                    }
+                    navigator.geolocation.getCurrentPosition(
+                        (position) => {
+                            latInput.disabled = false;
+                            lonInput.disabled = false;
+                            latInput.value = position.coords.latitude.toFixed(6);
+                            lonInput.value = position.coords.longitude.toFixed(6);
+                            submitData();
+                        },
+                        () => alert("Could not get your location. Please disable the toggle and enter it manually.")
+                    );
+                } else {
+                    submitData();
+                }
+            });
+
+            // Find this function in your predict.html file and replace it with this new one.
+
+            const submitData = async () => {
+                loadingOverlay.style.display = 'flex';
+
+                const formData = new FormData(form);
+                const data = Object.fromEntries(formData.entries());
+
+                try {
+                    // ===============================================================
+                    // === REAL API CALL =============================================
+                    // ===============================================================
+                    // This now points to your local Flask server.
+                    const response = await fetch('http://127.0.0.1:5000/predict', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(data),
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || `HTTP error! Status: ${response.status}`);
+                    }
+
+                    const resultData = await response.json();
+                    // ===============================================================
+
+                    // Store data and redirect to the output page
+                    sessionStorage.setItem('predictionResults', JSON.stringify(resultData));
+                    window.location.href = 'output.html';
+
+                } catch (error) {
+                    console.error("Submission Error:", error);
+                    alert(`An error occurred during the analysis: ${error.message}`);
+                    loadingOverlay.style.display = 'none'; // Hide loading on error
+                }
+            };
+            // Initialize the form state on page load
+            updateInputState();
+        });
+    </script>
+</body>
+
+</html>
