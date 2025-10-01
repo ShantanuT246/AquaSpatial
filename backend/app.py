@@ -326,6 +326,6 @@ def analyze_endpoint():
         print(f"An error occurred during analysis: {e}\n{traceback.format_exc()}", file=sys.stderr)
         return jsonify({"error": "An internal server error occurred."}), 500
 
-# --- Main Execution Block ---
-if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5000, debug=True)
+# # --- Main Execution Block ---
+# if __name__ == "__main__":
+#     app.run(host='0.0.0.0', port=5000, debug=True)
