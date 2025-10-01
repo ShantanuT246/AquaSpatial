@@ -307,11 +307,19 @@ def run_analysis(request_data: Dict[str, Any]) -> Dict[str, Any]:
     return serializable_results
 
 # --- Flask App Definition ---
-app = Flask(__name__, template_folder="frontend", static_folder="frontend/static")
+from flask import send_from_directory
+frontend_dir = (ROOT / "frontend").resolve()
+static_dir = (frontend_dir / "static").resolve()
+app = Flask(
+    __name__,
+    template_folder=str(frontend_dir),
+    static_folder=str(static_dir)
+)
 CORS(app)
 
 @app.route("/")
 def home():
+    # Serve index.html from the absolute frontend directory
     return render_template("index.html")
 
 @app.route('/analyze', methods=['POST'])
