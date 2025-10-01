@@ -1,25 +1,24 @@
 {
     "inputs": {
-        "rooftop_area": 200,
-        "dwellers": 3,
-        "roof_material": "tiles",
-        "longitude": 79.164726,
-        "latitude": 12.97401,
-        "model_dir": "C:\\Users\\SARTHAK\\Repos\\AquaSpatial\\ML"
+        "rooftop_area": 90,
+        "dwellers": 2,
+        "roof_material": "metal",
+        "longitude": 79.16372235755189,
+        "latitude": 12.973433902593046,
+        "model_dir": "/Users/shantanutapole/Documents/Projects/AquaSpatial/ML"
     },
     "outputs": {
-        "annual_rainfall_mm_total": 765.18,
-        "runoff_coefficient_error": "Allowed: tile, metal, asphalt, concrete",
-        "runoff_coefficient_error_trace": "Traceback (most recent call last):\n  File \"C:\\Users\\SARTHAK\\Repos\\AquaSpatial\\backend\\app.py\", line 219, in run_task\n    return {key: func(**kwargs)}\n                 ~~~~^^^^^^^^^^\n  File \"C:\\Users\\SARTHAK\\Repos\\AquaSpatial\\backend\\runoff_coeff.py\", line 12, in get_runoff_coefficient_strict\n    raise ValueError(\"Allowed: tile, metal, asphalt, concrete\")\nValueError: Allowed: tile, metal, asphalt, concrete\n",
+        "runoff_coefficient": 0.95,
         "soil_description": "other",
-        "drainage_density_km_per_km2": 0.2003904000853865,
+        "annual_rainfall_mm_total": 1147.24,
+        "drainage_density_km_per_km2": 0.2003904000853878,
         "ml_load_status": "ML predictor loaded successfully.",
-        "rainfall_data_status": "Estimated value (actual data not available)",
+        "rainfall_data_status": "Actual data received",
         "ml_prediction": {
-            "recharge_potential": "15552.39",
-            "suitability_score": "0.7107924",
-            "harvest_demand_ratio": "5.9039965",
-            "cost_estimation": "12843.443"
+            "recharge_potential": "10847.877",
+            "suitability_score": "0.8042486",
+            "harvest_demand_ratio": "5.8896356",
+            "cost_estimation": "6688.457"
         }
     }
 }

@@ -2,3 +2,7 @@ backend/__pycache__
 .env
 test.py
 backend/__pycache__/
+venv/
+.env
+__pycache__/
+*.pyc

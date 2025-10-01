@@ -25,10 +25,10 @@ sys.path.insert(0, str(ML_DIR))
 
 # ---- Module Imports ----
 try:
-    from drainage_density import compute_drainage_density
-    from get_rainfall import get_rainfall_data
-    from get_soil import get_soil_type
-    from runoff_coeff import get_runoff_coefficient_strict
+    from backend.drainage_density import compute_drainage_density
+    from backend.get_rainfall import get_rainfall_data
+    from backend.get_soil import get_soil_type
+    from backend.runoff_coeff import get_runoff_coefficient_strict
     from ML.main import RTRWHPredictor
     import joblib
 except ImportError as e:
@@ -169,4 +169,4 @@ def predict():
 if __name__ == '__main__':
     load_ml_predictor_on_startup()  # Load the model before starting the server
     # Use host='0.0.0.0' to make it accessible on your local network
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=True, host='0.0.0.0')

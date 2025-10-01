@@ -167,6 +167,8 @@ import random  # <-- 1. IMPORT ADDED
 # ---- Flask-related imports ----
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+from flask import render_template
+
 
 # ---- Constants and Configuration ----
 ROOT = Path(__file__).resolve().parent.parent
@@ -304,8 +306,12 @@ def run_analysis(request_data: Dict[str, Any]) -> Dict[str, Any]:
     return serializable_results
 
 # --- Flask App Definition ---
-app = Flask(__name__)
+app = Flask(__name__, template_folder="../frontend", static_folder="../frontend/static")
 CORS(app)
+
+@app.route("/")
+def home():
+    return render_template("index.html")
 
 @app.route('/analyze', methods=['POST'])
 def analyze_endpoint():
