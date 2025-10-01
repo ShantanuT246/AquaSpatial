@@ -163,6 +163,7 @@ from pathlib import Path
 import concurrent.futures
 from typing import Dict, Any, Tuple, Optional, Callable
 import random  # <-- 1. IMPORT ADDED
+import os
 
 # ---- Flask-related imports ----
 from flask import Flask, request, jsonify
@@ -327,5 +328,6 @@ def analyze_endpoint():
         return jsonify({"error": "An internal server error occurred."}), 500
 
 # # --- Main Execution Block ---
-# if __name__ == "__main__":
-#     app.run(host='0.0.0.0', port=5000, debug=True)
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
