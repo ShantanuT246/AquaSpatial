@@ -307,7 +307,7 @@ def run_analysis(request_data: Dict[str, Any]) -> Dict[str, Any]:
     return serializable_results
 
 # --- Flask App Definition ---
-app = Flask(__name__, template_folder="../frontend", static_folder="../frontend/static")
+app = Flask(__name__, template_folder="frontend", static_folder="frontend/static")
 CORS(app)
 
 @app.route("/")
