@@ -17,6 +17,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css"/>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-geometryutil/0.9.3/leaflet.geometryutil.min.js"></script>
+
+    <!-- Turf.js for accurate geodesic area -->
+    <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6.5.0/turf.min.js"></script>
+
     <style>
         :root {
             --primary: #0066cc;
@@ -636,10 +640,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const resultsContainer = document.getElementById('results-container');
     const submitButton = document.getElementById('submit-button');
 
-    // --- Initialize Leaflet Map ---
-    const map = L.map('map').setView([20.5937, 78.9629], 5); // Default to India
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors'
+    // --- Initialize Leaflet Map (Esri World Imagery satellite tiles) ---
+    const map = L.map('map').setView([20.5937, 78.9629], 13); // Default to India
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'Tiles &copy; Esri &mdash; Source: Esri, Maxar, Earthstar Geographics',
+        maxZoom: 19,
+        detectRetina: true
     }).addTo(map);
 
     const drawnItems = new L.FeatureGroup();
@@ -656,7 +662,7 @@ document.addEventListener('DOMContentLoaded', () => {
         navigator.geolocation.getCurrentPosition(pos => {
             const lat = pos.coords.latitude;
             const lng = pos.coords.longitude;
-            map.setView([lat, lng], 18);
+            map.setView([lat, lng], 17);
             L.marker([lat, lng]).addTo(map).bindPopup("You are here").openPopup();
         });
     }
@@ -668,16 +674,29 @@ document.addEventListener('DOMContentLoaded', () => {
         drawnItems.clearLayers(); // Keep only latest polygon
         drawnItems.addLayer(layer);
 
-        const latlngs = layer.getLatLngs()[0];
-        const area = L.GeometryUtil.geodesicArea(latlngs);
+        // Convert to GeoJSON and compute geodesic area with Turf
+        const geo = layer.toGeoJSON(); // GeoJSON uses [lng, lat]
+        let area = 0;
+        try {
+            area = turf.area(geo); // in square meters (geodesic)
+        } catch (e) {
+            console.warn('Turf area failed, falling back to geometryutil', e);
+            // fallback: use leaflet-geometryutil (not as robust)
+            const latlngs = layer.getLatLngs()[0] || [];
+            area = L.GeometryUtil.geodesicArea(latlngs);
+        }
 
         polygonJSON = {
             area_m2: area,
-            coordinates: latlngs.map(ll => ({lat: ll.lat, lng: ll.lng}))
+            geojson: geo
         };
 
         // Auto-fill rooftop_area in form
         document.getElementById('rooftop_area').value = area.toFixed(2);
+
+        // show popup on polygon with area
+        const popupHtml = `<strong>Area:</strong> ${Number(area).toLocaleString(undefined, {maximumFractionDigits:2})} m²`;
+        layer.bindPopup(popupHtml).openPopup();
 
         console.log("Polygon JSON:", polygonJSON);
     });
@@ -714,7 +733,7 @@ document.addEventListener('DOMContentLoaded', () => {
             roof_material: document.getElementById('roof_material').value,
             latitude: latitude,
             longitude: longitude,
-            roof_polygon: polygonJSON ? polygonJSON.coordinates : null
+            roof_polygon: polygonJSON ? polygonJSON.geojson : null
         };
         console.log("Form data gathered:", formData);
 
@@ -722,7 +741,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let data;
         try {
             console.log("Calling backend API...");
-            const response = await fetch('https://aquaspatial.onrender.com/analyze', { 
+            const response = await fetch('http://127.0.0.1:5000/analyze', { 
             //https://aquaspatial.onrender.com/analyze
             //http://127.0.0.1:5000/analyze
                 method: 'POST',
