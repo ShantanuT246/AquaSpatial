@@ -1,27 +1,27 @@
 {
     "inputs": {
-        "rooftop_area": 1163.45,
-        "dwellers": 200,
+        "rooftop_area": 1274.12,
+        "dwellers": 2000,
         "roof_material": "concrete",
         "longitude": 79.163948,
         "latitude": 12.973200499999999,
         "model_dir": "C:\\Users\\SARTHAK\\Repos\\AquaSpatial\\ML\\models"
     },
     "outputs": {
+        "annual_rainfall_mm_total": 813.57,
         "runoff_coefficient": 0.95,
-        "annual_rainfall_mm_total": 795.47,
         "soil_description": "other",
         "drainage_density_km_per_km2": 0.2003904000853865,
         "ml_load_status": "ML predictor loaded successfully.",
         "rainfall_data_status": "Estimated value (actual data not available)",
         "ml_prediction_error": "Predictor failure: 'numpy.ndarray' object has no attribute 'toarray'",
         "ml_prediction": {
-            "recharge_potential": 879212.52,
-            "suitability_score": 0.3762,
-            "harvest_demand_ratio": 0.089,
-            "cost_estimation": 648872.51,
-            "deterministic_liters": 879212.52,
-            "ml_adjusted_liters": 879212.52,
+            "recharge_potential": 984761.79,
+            "suitability_score": 0.3524,
+            "harvest_demand_ratio": 0.01,
+            "cost_estimation": 723269.07,
+            "deterministic_liters": 984761.79,
+            "ml_adjusted_liters": 984761.79,
             "residual_pred": 0.0,
             "used_ml": false
         }
