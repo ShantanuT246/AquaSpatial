@@ -1,10 +1,10 @@
 {
     "inputs": {
-        "rooftop_area": 90,
-        "dwellers": 2,
+        "rooftop_area": 1938.28,
+        "dwellers": 500,
         "roof_material": "metal",
-        "longitude": 79.16341963119878,
-        "latitude": 12.973311581979566,
+        "longitude": 79.16369507810235,
+        "latitude": 12.973405910371389,
         "model_dir": "/Users/shantanutapole/Documents/Projects/AquaSpatial/ML"
     },
     "outputs": {
@@ -15,10 +15,10 @@
         "ml_load_status": "ML predictor loaded successfully.",
         "rainfall_data_status": "Actual data received",
         "ml_prediction": {
-            "recharge_potential": "10847.877",
-            "suitability_score": "0.8042486",
-            "harvest_demand_ratio": "5.8896356",
-            "cost_estimation": "6688.457"
+            "recharge_potential": "36487.383",
+            "suitability_score": "-0.87272453",
+            "harvest_demand_ratio": "-152.31151",
+            "cost_estimation": "464516.16"
         }
     }
 }
