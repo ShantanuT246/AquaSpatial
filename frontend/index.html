@@ -697,53 +697,95 @@
                 // Disable button and show loading text
                 submitButton.disabled = true;
                 submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Calculating...';
-                
+
+                let latitude, longitude, formData, response, data;
+
+                // --- Step 1: Get Location ---
                 try {
-                    // --- Get Location ---
                     alert('Please allow location access to get accurate rainfall and soil data for your area.');
                     const position = await getUserLocation();
-                    const { latitude, longitude } = position.coords;
+                    latitude = position.coords.latitude;
+                    longitude = position.coords.longitude;
+                } catch (error) {
+                    resultsContainer.innerHTML = `<div class="section-title"><h2>Error</h2><p>Could not get your location: ${error.message || error}. Please allow location access and try again.</p></div>`;
+                    resultsSection.classList.add('active');
+                    submitButton.disabled = false;
+                    submitButton.innerHTML = '<i class="fas fa-calculator"></i> Calculate Prediction';
+                    return;
+                }
 
-                    // --- Gather Form Data ---
-                    const formData = {
+                // --- Step 2: Gather Form Data ---
+                try {
+                    formData = {
                         rooftop_area: parseFloat(document.getElementById('rooftop_area').value),
                         dwellers: parseInt(document.getElementById('dwellers').value, 10),
                         roof_material: document.getElementById('roof_material').value,
                         latitude: latitude,
                         longitude: longitude,
                     };
+                    if (
+                        isNaN(formData.rooftop_area) ||
+                        isNaN(formData.dwellers) ||
+                        !formData.roof_material
+                    ) {
+                        throw new Error('Invalid form input. Please check your values.');
+                    }
+                } catch (error) {
+                    resultsContainer.innerHTML = `<div class="section-title"><h2>Error</h2><p>Could not gather form data: ${error.message || error}. Please check your input and try again.</p></div>`;
+                    resultsSection.classList.add('active');
+                    submitButton.disabled = false;
+                    submitButton.innerHTML = '<i class="fas fa-calculator"></i> Calculate Prediction';
+                    return;
+                }
 
-                    // --- Call the Backend API ---
-                    const response = await fetch('http://127.0.0.1:5000/analyze', {
+                // --- Step 3: Call the Backend API ---
+                try {
+                    response = await fetch('http://127.0.0.1:5000/analyze', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
                         },
                         body: JSON.stringify(formData)
                     });
-
                     if (!response.ok) {
                         throw new Error(`HTTP error! Status: ${response.status}`);
                     }
-
-                    const data = await response.json();
-                    
-                    // --- Display the Results ---
-                    displayResults(data);
-                    resultsSection.classList.add('active'); // Show the results section
-                    
-                    // Scroll to the results
-                    resultsSection.scrollIntoView({ behavior: 'smooth' });
-
                 } catch (error) {
-                    console.error('An error occurred:', error);
-                    resultsContainer.innerHTML = `<div class="section-title"><h2>Error</h2><p>Something went wrong: ${error.message}. Please check the console and make sure the backend server is running.</p></div>`;
+                    resultsContainer.innerHTML = `<div class="section-title"><h2>Error</h2><p>Could not connect to the backend server: ${error.message || error}. Please ensure the backend is running.</p></div>`;
                     resultsSection.classList.add('active');
-                } finally {
-                    // Re-enable the button
                     submitButton.disabled = false;
                     submitButton.innerHTML = '<i class="fas fa-calculator"></i> Calculate Prediction';
+                    return;
                 }
+
+                // --- Step 4: Parse JSON Response ---
+                try {
+                    data = await response.json();
+                } catch (error) {
+                    resultsContainer.innerHTML = `<div class="section-title"><h2>Error</h2><p>Failed to parse server response. Please try again. (${error.message || error})</p></div>`;
+                    resultsSection.classList.add('active');
+                    submitButton.disabled = false;
+                    submitButton.innerHTML = '<i class="fas fa-calculator"></i> Calculate Prediction';
+                    return;
+                }
+
+                // --- Step 5: Display Results ---
+                try {
+                    displayResults(data);
+                    resultsSection.classList.add('active'); // Show the results section
+                    // Scroll to the results
+                    resultsSection.scrollIntoView({ behavior: 'smooth' });
+                } catch (error) {
+                    resultsContainer.innerHTML = `<div class="section-title"><h2>Error</h2><p>Could not display results: ${error.message || error}. Please try again.</p></div>`;
+                    resultsSection.classList.add('active');
+                    submitButton.disabled = false;
+                    submitButton.innerHTML = '<i class="fas fa-calculator"></i> Calculate Prediction';
+                    return;
+                }
+
+                // Re-enable the button
+                submitButton.disabled = false;
+                submitButton.innerHTML = '<i class="fas fa-calculator"></i> Calculate Prediction';
             });
 
             // Add smooth scrolling for navigation links
