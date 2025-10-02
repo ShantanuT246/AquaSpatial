@@ -182,10 +182,10 @@ DATASETS_DIR = ROOT / "datasets"
 
 # ---- Module Imports ----
 try:
-    from drainage_density import compute_drainage_density
-    from get_rainfall import get_rainfall_data
-    from get_soil import get_soil_type
-    from runoff_coeff import get_runoff_coefficient_strict
+    from backend.drainage_density import compute_drainage_density
+    from backend.get_rainfall import get_rainfall_data
+    from backend.get_soil import get_soil_type
+    from backend.runoff_coeff import get_runoff_coefficient_strict
     from ML.main import RTRWHPredictor
 except ImportError as e:
     print(f"FATAL: A required module could not be imported. Please check your installation. Details: {e}", file=sys.stderr)
