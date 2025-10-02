@@ -741,7 +741,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let data;
         try {
             console.log("Calling backend API...");
-            const response = await fetch('http://127.0.0.1:5000/analyze', { 
+            const response = await fetch('https://aquaspatial.onrender.com/analyze', { 
             //https://aquaspatial.onrender.com/analyze
             //http://127.0.0.1:5000/analyze
                 method: 'POST',
@@ -774,7 +774,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
                 <div class="results-grid">
                     <div class="result-card">
-                        <div class="result-label"><i class="fas fa-recycle"></i> Recharge Potential</div>
+                        <div class="result-label"><i class="fas fa-recycle"></i> Artificial Recharge Potential</div>
                         <div class="result-value">${formatNumber(prediction.recharge_potential)}</div>
                         <div class="result-unit">Liters/year</div>
                     </div>
