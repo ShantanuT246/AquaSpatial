@@ -432,6 +432,8 @@ CORS(app)
 def home():
     return render_template("index.html")
 
+import time
+
 @app.route('/analyze', methods=['POST'])
 def analyze_endpoint():
     print("Received a request on /analyze")
@@ -439,7 +441,12 @@ def analyze_endpoint():
         return jsonify({"error": "Request must be JSON"}), 400
     request_data = request.get_json()
     try:
+        start_time = time.time()
         results = run_analysis(request_data)
+        end_time = time.time()
+        elapsed = end_time - start_time
+        # Add calculation time to the JSON response, rounded to 2 decimal places
+        results['calculation_time_sec'] = round(elapsed, 2)
         return jsonify(results)
     except Exception as e:
         print(f"An error occurred during analysis: {e}\n{traceback.format_exc()}", file=sys.stderr)
@@ -447,4 +454,4 @@ def analyze_endpoint():
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+    app.run(host="0.0.0.0", port=port, debug=True)

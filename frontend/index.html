@@ -1,154 +1,639 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AquaSpatial</title>
 
     <!-- Fonts & icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet"/>
-    <link rel="preconnect" href="https://fonts.googleapis.com"/>
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-    <link href="https://fonts.googleapis.com/css2?family=Doto:wght,ROND@500,100&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Roboto:wght@300;400;500&display=swap"
+        rel="stylesheet" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Doto:wght,ROND@500,100&display=swap" rel="stylesheet" />
 
     <!-- Leaflet -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <!-- Leaflet Draw + Geometry util -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-geometryutil/0.9.3/leaflet.geometryutil.min.js"></script>
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-geometryutil/0.9.3/leaflet.geometryutil.min.js"></script>
 
     <!-- Turf for geodesic area -->
     <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6.5.0/turf.min.js"></script>
 
     <style>
-        :root{
-            --primary:#0066cc; --primary-dark:#004999; --primary-light:#4d94ff;
-            --secondary:#00c4cc; --accent:#00cc99; --dark:#0a0a14; --darker:#050510;
-            --light:#f0f6ff; --gray:#6c757d; --shadow: 0 10px 30px rgba(0,0,0,0.3); --transition: all .3s ease;
+        :root {
+            --primary: #0066cc;
+            --primary-dark: #004999;
+            --primary-light: #4d94ff;
+            --secondary: #00c4cc;
+            --accent: #00cc99;
+            --dark: #0a0a14;
+            --darker: #050510;
+            --light: #f0f6ff;
+            --gray: #6c757d;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            --transition: all .3s ease;
         }
-        *{margin:0;padding:0;box-sizing:border-box;}
-        body{
-            font-family: 'Doto','Roboto', sans-serif;
-            color:var(--light);
-            background: linear-gradient(135deg,var(--darker) 0%, var(--dark) 100%);
-            min-height:100vh;
-            overflow-x:hidden;
-            line-height:1.6;
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        h1,h2,h3,h4,h5,h6{font-family:'Doto','Montserrat',sans-serif;font-weight:700;}
-        .container{width:100%;max-width:1200px;margin:0 auto;padding:0 20px;}
+
+        body {
+            font-family: 'Doto', 'Roboto', sans-serif;
+            color: var(--light);
+            background: linear-gradient(135deg, var(--darker) 0%, var(--dark) 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            font-family: 'Doto', 'Montserrat', sans-serif;
+            font-weight: 700;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
 
         /* NAV */
-        header{display:flex;justify-content:center;position:fixed;top:10px;left:0;width:100%;z-index:1000}
-        .nav-container{
-            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-            color:white;padding:12px 20px;border-radius:30px;border:1px solid rgba(255,255,255,0.18);
-            display:flex;align-items:center;justify-content:space-between;gap:20px;width:calc(100% - 40px);max-width:1200px;
+        header {
+            display: flex;
+            justify-content: center;
+            position: fixed;
+            top: 10px;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
         }
-        .nav-left{display:flex;align-items:center;gap:20px;}
-        .logo{display:flex;align-items:center;gap:10px;}
-        .logo-img{height:40px;width:auto;display:block;}
-        .logo h1{font-size:1.7rem;font-weight:900;color:beige;margin:0;}
-        nav ul{display:flex;list-style:none;gap:18px;align-items:center;margin-left:8px}
-        nav ul li a{color:var(--light);text-decoration:none;font-weight:500;position:relative;padding:8px 0;font-size:1.05rem}
-        nav ul li a:after{content:'';position:absolute;bottom:0;left:0;width:0;height:2px;background:linear-gradient(to right,var(--primary),var(--secondary));transition:var(--transition)}
-        nav ul li a:hover:after{width:100%}
-        nav ul li a:hover{color:var(--primary-light)}
 
-        /* language selector (top-right) */
-        .lang-controls{display:flex;align-items:center;gap:8px}
-        .lang-btn{padding:6px 12px;border-radius:8px;background:linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));border:1px solid rgba(255,255,255,0.06);cursor:pointer;font-weight:600;font-size:0.9rem;color:var(--light)}
-        .lang-btn.active{background:linear-gradient(90deg,var(--primary),var(--secondary)); color:white; box-shadow:0 6px 18px rgba(0,0,0,0.3)}
+        .nav-container {
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            width: calc(100% - 40px);
+            max-width: 1200px;
+            position: relative;
+        }
+
+        .nav-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex: 1 1 auto;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-img {
+            height: 40px;
+            width: auto;
+            display: block;
+        }
+
+        .logo h1 {
+            font-size: 1.7rem;
+            font-weight: 900;
+            color: beige;
+            margin: 0;
+        }
+
+        /* Hamburger - now a single downward arrow, positioned far right */
+        .hamburger {
+            display: none;
+            justify-content: center;
+            align-items: center;
+            width: 38px;
+            height: 38px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            z-index: 1500;
+            margin-left: auto;
+            font-size: 1.6rem;
+            color: var(--light);
+            /* Remove flex-direction: column */
+        }
+        .hamburger .arrow {
+            display: block;
+            font-size: 2rem;
+            color: var(--light);
+            line-height: 1;
+            pointer-events: none;
+            user-select: none;
+        }
+
+        /* Dropdown container for nav links and lang controls */
+        .nav-dropdown {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+        .nav-dropdown nav ul {
+            display: flex;
+            list-style: none;
+            gap: 18px;
+            align-items: center;
+            margin-left: 8px;
+        }
+        .nav-dropdown nav ul li a {
+            color: var(--light);
+            text-decoration: none;
+            font-weight: 500;
+            position: relative;
+            padding: 8px 0;
+            font-size: 1.05rem;
+        }
+        .nav-dropdown nav ul li a:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            transition: var(--transition);
+        }
+        .nav-dropdown nav ul li a:hover:after {
+            width: 100%;
+        }
+        .nav-dropdown nav ul li a:hover {
+            color: var(--primary-light);
+        }
+        .lang-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .lang-btn {
+            padding: 6px 12px;
+            border-radius: 8px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--light);
+        }
+        .lang-btn.active {
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            color: white;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Responsive navbar styles */
+        @media (max-width: 768px) {
+            .nav-container {
+                flex-direction: row;
+                align-items: center;
+                gap: 0;
+                padding: 10px 8px;
+            }
+            .nav-header {
+                flex-direction: row;
+                align-items: center;
+                gap: 10px;
+                flex: 1 1 auto;
+            }
+            .hamburger {
+                display: flex;
+                margin-left: auto;
+                order: 2;
+            }
+            .nav-dropdown {
+                position: absolute;
+                top: 62px;
+                right: 0;
+                margin: 0;
+                left: auto;
+                width: 95vw;
+                max-width: 400px;
+                background: rgba(20,30,50,0.97);
+                border-radius: 18px;
+                box-shadow: var(--shadow);
+                flex-direction: column;
+                align-items: flex-end;
+                gap: 0;
+                padding: 18px 18px 10px 18px;
+                z-index: 1200;
+                display: none;
+            }
+            .nav-dropdown.open {
+                display: flex;
+            }
+            .nav-dropdown nav ul {
+                flex-direction: column;
+                align-items: flex-end;
+                gap: 10px;
+                margin-left: 0;
+                width: 100%;
+            }
+            .lang-controls {
+                width: 100%;
+                justify-content: flex-end;
+                margin-top: 14px;
+            }
+        }
 
         /* HERO */
-        .hero{position:relative;overflow:hidden;width:100vw;height:80vh;color:white;text-align:center;display:flex;flex-direction:column;justify-content:center;align-items:center}
-        .hero .spline-bg{position:absolute;top:0;left:0;width:100%;height:100%;z-index:0}
-        .hero h1{position:absolute;top:40%;left:50%;transform:translate(-50%,-60%);z-index:2;font-size:3.6rem;margin-bottom:0;max-width:900px;padding:0 30px;animation:fadeInUp 1s ease;color:#fff;text-align:center;text-shadow:0 4px 24px rgba(0,0,0,0.4)}
-        .hero p{font-size:1.1rem;max-width:800px;margin:0 auto 40px;color:var(--light)}
-        .hero-buttons{display:flex;gap:20px}
+        .hero {
+            position: relative;
+            overflow: hidden;
+            width: 100vw;
+            height: 93vh;
+            color: white;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .hero .spline-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .hero h1 {
+            position: absolute;
+            top: 40%;
+            left: 50%;
+            transform: translate(-50%, -60%);
+            z-index: 2;
+            font-size: 3.6rem;
+            margin-bottom: 0;
+            max-width: 900px;
+            padding: 0 30px;
+            animation: fadeInUp 1s ease;
+            color: #fff;
+            text-align: center;
+            text-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+        }
+
+        .hero p {
+            font-size: 1.1rem;
+            max-width: 800px;
+            margin: 0 auto 40px;
+            color: var(--light);
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 20px;
+        }
 
         /* Features */
-        .features{padding:20px 0;background:var(--dark);border-radius:20px;margin:40px 0}
-        .section-title{text-align:center;margin-bottom:40px}
-        .section-title h2{font-size:2.6rem;color:var(--primary-light);margin-bottom:10px}
-        .section-title p{font-size:1.2rem;color:var(--light);max-width:700px;margin:0 auto}
+        .features {
+            padding: 20px 0;
+            background: var(--dark);
+            border-radius: 20px;
+            margin: 40px 0;
+        }
 
-        .features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:30px}
-        .feature-card{background:linear-gradient(135deg, rgba(0,30,60,0.5) 0%, rgba(0,20,40,0.7) 100%);border-radius:15px;padding:30px;text-align:center;box-shadow:var(--shadow);backdrop-filter:blur(10px);border:1px solid rgba(77,148,255,0.12)}
-        .feature-icon{width:70px;height:70px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;color:white;font-size:1.6rem;background:linear-gradient(135deg,var(--primary),var(--secondary))}
-        .feature-card h3{color:var(--primary-light);margin-bottom:10px}
-        .feature-card p{color:var(--light); font-size:0.95rem;}
+        .section-title {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .section-title h2 {
+            font-size: 2.6rem;
+            color: var(--primary-light);
+            margin-bottom: 10px;
+        
+        }
+
+        .section-title p {
+            font-size: 1.2rem;
+            color: var(--light);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 30px;
+        }
+
+        .feature-card {
+            background: linear-gradient(135deg, rgba(0, 30, 60, 0.5) 0%, rgba(0, 20, 40, 0.7) 100%);
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(77, 148, 255, 0.12);
+        }
+
+        .feature-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            color: white;
+            font-size: 1.6rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+        }
+
+        .feature-card h3 {
+            color: var(--primary-light);
+            margin-bottom: 10px;
+        }
+
+        .feature-card p {
+            color: var(--light);
+            font-size: 0.95rem;
+        }
 
         /* prediction form */
-        .prediction-section{padding:80px 0;background:linear-gradient(135deg,var(--darker) 0%, var(--dark) 100%);border-radius:20px;margin:40px 0}
-        .form-container{background:linear-gradient(135deg, rgba(0,30,60,0.5) 0%, rgba(0,20,40,0.7) 100%);border-radius:20px;box-shadow:var(--shadow);padding:40px;margin-top:20px;backdrop-filter:blur(10px);border:1px solid rgba(77,148,255,0.12)}
-        .form-title h2{font-size:2rem;color:var(--primary-light);margin-bottom:12px}
-        .form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
-        .form-grid .form-group{display:flex;flex-direction:column}
-        .form-group label{font-weight:600;color:var(--primary-light);margin-bottom:8px;display:flex;align-items:center}
-        .form-group label i{margin-right:8px;color:var(--primary)}
-        .form-control{padding:12px 14px;border-radius:10px;border:2px solid rgba(77,148,255,0.15);background:rgba(0,20,40,0.6);color:var(--light)}
-        .form-control:focus{outline:none;box-shadow:0 0 0 3px rgba(0,102,204,0.15)}
-        .submit-btn{grid-column:span 2;padding:14px 24px;border-radius:50px;font-weight:600;background:linear-gradient(to right,var(--primary),var(--secondary));border:none;color:white;cursor:pointer}
+        .prediction-section {
+            padding: 80px 0;
+            background: linear-gradient(135deg, var(--darker) 0%, var(--dark) 100%);
+            border-radius: 20px;
+            margin: 40px 0;
+        }
+
+        .form-container {
+            background: linear-gradient(135deg, rgba(0, 30, 60, 0.5) 0%, rgba(0, 20, 40, 0.7) 100%);
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            padding: 40px;
+            margin-top: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(77, 148, 255, 0.12);
+        }
+
+        .form-title h2 {
+            font-size: 2.6rem;
+            color: var(--primary-light);
+            margin-bottom: 12px;
+            text-align: center;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .form-grid .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--primary-light);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+        }
+
+        .form-group label i {
+            margin-right: 8px;
+            font-size: 1.2rem;
+            color: var(--primary);
+        }
+
+        .form-control {
+            padding: 12px 14px;
+            border-radius: 10px;
+            border: 2px solid rgba(77, 148, 255, 0.15);
+            background: rgba(0, 20, 40, 0.6);
+            color: var(--light);
+        }
+
+        .form-control:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.15);
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 16px 0;
+            border-radius: 12px;
+            font-weight: 900;
+            font-size: 1.05rem;
+            background: linear-gradient(to bottom, #007AFF, #005BB5);
+            color: white;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+            transition: all 0.3s ease;
+            font-family: 'Doto';
+        }
+
+        .submit-btn:hover {
+            background: linear-gradient(to bottom, #005BB5, #004999);
+            box-shadow: 0 6px 14px rgba(0, 90, 200, 0.35);
+        }
 
         /* results (modified) */
-        .results-section{padding:40px 0;background:var(--dark);border-radius:20px;margin:40px 0;display:none}
-        .results-section.active{display:block;animation:fadeIn .6s ease}
-        #results-container{}
+        .results-section {
+            padding: 40px 0;
+            background: var(--dark);
+            border-radius: 20px;
+            margin: 40px 0;
+            display: none;
+        }
 
-        .results-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:22px;margin-top:20px}
-        .result-card{background:linear-gradient(135deg, rgba(0,30,60,0.5) 0%, rgba(0,20,40,0.7) 100%);border-radius:15px;padding:22px;text-align:center;box-shadow:var(--shadow);backdrop-filter:blur(10px);border:1px solid rgba(77,148,255,0.12);min-height:140px}
-        .result-label{font-size:16px;color:var(--primary-light);margin-bottom:10px;display:flex;justify-content:center;align-items:center}
-        .result-label i{margin-right:10px;color:var(--primary);font-size:18px}
-        .result-value{font-size:30px;font-weight:800;color:white;margin:8px 0}
-        .result-unit{font-size:14px;color:var(--light)}
-        .small-note{margin-top:10px;font-size:13px;color:var(--gray)}
-        .dimensions-list{text-align:left;margin-top:10px;font-size:15px;color:var(--light)}
-        .dimensions-list li{margin-bottom:6px}
+        .results-section.active {
+            display: block;
+            animation: fadeIn .6s ease;
+        }
 
-        .wide-3{grid-column:span 3}
-        .wide-1{grid-column:span 1}
+        #results-container {}
 
-        @media (max-width:1100px){.results-grid{grid-template-columns:repeat(2,1fr)} .wide-3{grid-column:1 / -1} .wide-1{grid-column:span 1}}
-        @media (max-width:600px){.results-grid{grid-template-columns:repeat(1,1fr)} .wide-3,.wide-1{grid-column:1 / -1} .result-value{font-size:22px} .result-label{font-size:14px}}
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 22px;
+            margin-top: 20px;
+        }
+
+        .result-card {
+            background: linear-gradient(135deg, rgba(0, 30, 60, 0.5) 0%, rgba(0, 20, 40, 0.7) 100%);
+            border-radius: 15px;
+            padding: 22px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(77, 148, 255, 0.12);
+            min-height: 140px;
+        }
+
+        .result-label {
+            font-size: 25px;
+            color: var(--primary-light);
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .result-label i {
+            margin-right: 10px;
+            color: var(--primary);
+            font-size: 30px;
+        }
+
+        .result-value {
+            font-size: 25px;
+            font-weight: 800;
+            color: white;
+            margin: 8px 0;
+        }
+
+        .result-unit {
+            font-size: 14px;
+            color: var(--light);
+        }
+
+        .small-note {
+            margin-top: 10px;
+            font-size: 13px;
+            color: var(--gray);
+        }
+
+        .dimensions-list {
+            text-align: left;
+            margin-top: 10px;
+            font-size: 15px;
+            color: var(--light);
+        }
+
+        .dimensions-list li {
+            margin-bottom: 6px;
+        }
+
+        .wide-3 {
+            grid-column: span 3;
+        }
+
+        .wide-1 {
+            grid-column: span 1;
+        }
+
+        @media (max-width:1100px) {
+            .results-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .wide-3 {
+                grid-column: 1 / -1;
+            }
+
+            .wide-1 {
+                grid-column: span 1;
+            }
+        }
+
+        @media (max-width:600px) {
+            .results-grid {
+                grid-template-columns: repeat(1, 1fr);
+            }
+
+            .wide-3,
+            .wide-1 {
+                grid-column: 1 / -1;
+            }
+
+            .result-value {
+                font-size: 22px;
+            }
+
+            .result-label {
+                font-size: 14px;
+            }
+        }
 
         /* small helpers */
-        .muted{color:var(--gray);font-size:13px}
-        .center{display:flex;align-items:center;justify-content:center}
+        .muted {
+            color: var(--gray);
+            font-size: 15px;
+        }
+
+        .center {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
     </style>
 </head>
+
 <body>
     <!-- NAV -->
     <header>
         <div class="nav-container" role="banner">
-            <div class="nav-left">
+            <div class="nav-header">
                 <div class="logo">
-                    <img src="{{ url_for('static', filename='images/aquaspatial_logo2.svg') }}" class="logo-img" alt="AquaSpatial Logo"/>
+                    <img src="{{ url_for('static', filename='aquaspatial_logo2.svg') }}" class="logo-img"
+                        alt="AquaSpatial Logo" />
                     <h1 id="brand-text">AquaSpatial</h1>
                 </div>
+            </div>
+            <button class="hamburger" id="hamburger" aria-label="Menu" aria-expanded="false" aria-controls="nav-dropdown">
+                <span class="arrow">&#x25BC;</span>
+            </button>
+            <div class="nav-dropdown" id="nav-dropdown">
                 <nav aria-label="main-nav">
                     <ul>
                         <li><a href="#features" id="nav-features">Features</a></li>
                         <li><a href="#predict" id="nav-predict">Predict</a></li>
                     </ul>
                 </nav>
-            </div>
-
-            <div class="lang-controls" id="lang-controls" aria-label="language controls">
-                <button class="lang-btn" data-lang="en" id="lang-en">English</button>
-                <button class="lang-btn" data-lang="hi" id="lang-hi">हिंदी</button>
-                <button class="lang-btn" data-lang="local" id="lang-local">Local</button>
+                <div class="lang-controls" id="lang-controls" aria-label="language controls">
+                    <button class="lang-btn" data-lang="en" id="lang-en">English</button>
+                    <button class="lang-btn" data-lang="hi" id="lang-hi">हिंदी</button>
+                    <button class="lang-btn" data-lang="local" id="lang-local">Local</button>
+                </div>
             </div>
         </div>
     </header>
 
     <!-- HERO -->
     <section class="hero" style="margin-top:70px">
-        <spline-viewer url="https://prod.spline.design/7CkMRWWoRAlNnPdF/scene.splinecode" class="spline-bg"></spline-viewer>
+        <spline-viewer url="https://prod.spline.design/7CkMRWWoRAlNnPdF/scene.splinecode"
+            class="spline-bg"></spline-viewer>
+        <div class="hero-heading">Unlock Smart Rainwater Insights and Sustainable Groundwater Management</div>
     </section>
 
     <!-- FEATURES -->
@@ -156,29 +641,34 @@
         <div class="container">
             <div class="section-title">
                 <h2 id="features-title">Why Choose Our Solution</h2>
-                <p id="features-sub">Combines GIS, hydrology heuristics and a hybrid ML-corrected model to give practical recommendations.</p>
+                <p id="features-sub">Combines GIS, hydrology heuristics and a hybrid ML-corrected model to give
+                    practical recommendations.</p>
             </div>
 
             <div class="features-grid">
                 <div class="feature-card">
                     <div class="feature-icon"><i class="fas fa-brain"></i></div>
                     <h3 class="f-title" data-key="ft1">AI + Physics</h3>
-                    <p class="f-desc" data-key="fd1">Deterministic runoff estimation combined with residual ML adjustment (if model available).</p>
+                    <p class="f-desc" data-key="fd1">Deterministic runoff estimation combined with residual ML
+                        adjustment (if model available).</p>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon"><i class="fas fa-water"></i></div>
                     <h3 class="f-title" data-key="ft2">Recharge & Harvest</h3>
-                    <p class="f-desc" data-key="fd2">Estimates recharge potential and shows recommended structures & dimensions.</p>
+                    <p class="f-desc" data-key="fd2">Estimates recharge potential and shows recommended structures &
+                        dimensions.</p>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon"><i class="fas fa-tools"></i></div>
                     <h3 class="f-title" data-key="ft3">Practical Outputs</h3>
-                    <p class="f-desc" data-key="fd3">Cost breakdown, payback, feasibility check and maps to help decision making.</p>
+                    <p class="f-desc" data-key="fd3">Cost breakdown, payback, feasibility check and maps to help
+                        decision making.</p>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon"><i class="fas fa-chart-line"></i></div>
                     <h3 class="f-title" data-key="ft4">Local Data</h3>
-                    <p class="f-desc" data-key="fd4">Uses rainfall, soil & drainage lookups for site-specific recommendations.</p>
+                    <p class="f-desc" data-key="fd4">Uses rainfall, soil & drainage lookups for site-specific
+                        recommendations.</p>
                 </div>
             </div>
         </div>
@@ -189,38 +679,156 @@
         <div class="container">
             <div class="form-title">
                 <h2 id="form-title">Rainwater Harvesting Prediction</h2>
-                <p id="form-sub">Draw your rooftop on the map or enter rooftop area manually. (Slope is handled automatically — no input required.)</p>
+                <p id="form-sub">Draw your rooftop on the map or enter rooftop area manually. (Slope is handled
+                    automatically — no input required.)</p>
             </div>
 
-            <div class="form-container">
-                <div id="map" style="height:420px;width:100%;border-radius:12px;border:1px solid rgba(77,148,255,0.12);margin-bottom:20px"></div>
+            <div class="form-map-flex-container">
+                <div class="map-side">
+                    <div id="map"></div>
+                </div>
+                <div class="form-side">
+                    <form id="prediction-form" class="form-grid">
+                        <div class="form-group">
+                            <label for="rooftop_area"><i class="fas fa-home"></i> <span data-key="label_rooftop">Rooftop
+                                    Area (m²)</span></label>
+                            <input id="rooftop_area" class="form-control" name="rooftop_area" type="number" step="any"
+                                value="90" required />
+                        </div>
+                        <div class="form-group">
+                            <label for="dwellers"><i class="fas fa-users"></i> <span data-key="label_dwellers">Number of
+                                    Dwellers</span></label>
+                            <input id="dwellers" class="form-control" name="dwellers" type="number" value="2" required />
+                        </div>
+                        <div class="form-group">
+                            <label for="roof_material"><i class="fas fa-layer-group"></i> <span
+                                    data-key="label_roof_material">Roof Material</span></label>
+                            <select id="roof_material" class="form-control" name="roof_material">
+                                <option value="metal" data-key="roof_metal">Metal</option>
+                                <option value="tiles" data-key="roof_tiles">Tiles</option>
+                                <option value="concrete" data-key="roof_concrete">Concrete</option>
+                                <option value="asphalt" data-key="roof_asphalt">Asphalt</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin-left: 15px;">
+                            <label for="location_note"><i class="fas fa-map-pin"></i> <span data-key="label_location">Using
+                                    Current Location</span></label>
+                            <div class="muted" data-key="location_note_text">We will use your browser's location when you
+                                submit to look up rainfall & soil.</div>
+                        </div>
 
-                <form id="prediction-form" class="form-grid">
-                    <div class="form-group">
-                        <label for="rooftop_area"><i class="fas fa-home"></i> <span data-key="label_rooftop">Rooftop Area (m²)</span></label>
-                        <input id="rooftop_area" class="form-control" name="rooftop_area" type="number" step="any" value="90" required/>
-                    </div>
-                    <div class="form-group">
-                        <label for="dwellers"><i class="fas fa-users"></i> <span data-key="label_dwellers">Number of Dwellers</span></label>
-                        <input id="dwellers" class="form-control" name="dwellers" type="number" value="2" required/>
-                    </div>
-                    <div class="form-group">
-                        <label for="roof_material"><i class="fas fa-layer-group"></i> <span data-key="label_roof_material">Roof Material</span></label>
-                        <select id="roof_material" class="form-control" name="roof_material">
-                            <option value="metal" data-key="roof_metal">Metal</option>
-                            <option value="tiles" data-key="roof_tiles">Tiles</option>
-                            <option value="concrete" data-key="roof_concrete">Concrete</option>
-                            <option value="asphalt" data-key="roof_asphalt">Asphalt</option>
-                        </select>
-                    </div>
-                    <div class="form-group" style="margin-left: 15px;">
-                        <label for="location_note"><i class="fas fa-map-pin"></i> <span data-key="label_location">Using Current Location</span></label>
-                        <div class="muted" data-key="location_note_text">We will use your browser's location when you submit to look up rainfall & soil.</div>
-                    </div>
-
-                    <button type="submit" id="submit-button" class="submit-btn"> <i class="fas fa-calculator"></i> <span data-key="btn_calculate">Calculate Prediction</span></button>
-                </form>
+                        <button type="submit" id="submit-button" class="submit-btn"> <i class="fas fa-calculator"></i> <span
+                                data-key="btn_calculate">Calculate Prediction</span></button>
+                        <div id="calculation-time"></div>
+                    </form>
+                </div>
             </div>
+    <style>
+        /* FLEX LAYOUT FOR MAP + FORM */
+        .form-map-flex-container {
+            display: flex;
+            gap: 36px;
+            align-items: flex-start;
+            justify-content: center;
+            width: 100%;
+            margin-top: 20px;
+        }
+        .form-map-flex-container .map-side {
+            flex: 1 1 48%;
+            min-width: 340px;
+            max-width: 52%;
+            display: flex;
+            flex-direction: column;
+            /* Ensure map-side always matches map height */
+            height: auto;
+        }
+        .form-map-flex-container .form-side {
+            flex: 1 1 40%;
+            min-width: 320px;
+            max-width: 50%;
+        }
+        /* Map styling (remove inline style, set here) */
+        #map {
+            height: 420px;
+            width: 100%;
+            border-radius: 12px;
+            border: 1px solid rgba(77,148,255,0.12);
+            margin-bottom: 0;
+            display: block;
+        }
+        /* Ensure map-side container matches the height of #map on large screens */
+        @media (min-width: 901px) {
+            .form-map-flex-container .map-side {
+                height: 420PX;
+            }
+            .form-map-flex-container .map-side > #map {
+                height: 100%;
+            }
+        }
+        /* Remove margin-bottom from map-side on flex layout */
+        .form-map-flex-container .map-side #map {
+            margin-bottom: 0;
+        }
+        /* Remove old .form-container padding/margin if present */
+        .form-container {
+            padding: 0;
+            margin: 0;
+            background: none;
+            border: none;
+            box-shadow: none;
+        }
+        /* Responsive: stack vertically on small screens */
+        @media (max-width: 900px) {
+            .form-map-flex-container {
+                flex-direction: column;
+                gap: 24px;
+            }
+            .form-map-flex-container .map-side,
+            .form-map-flex-container .form-side {
+                min-width: 0;
+                max-width: 100%;
+                width: 100%;
+            }
+        }
+        /* HERO HEADING (mobile) */
+        .hero-heading {
+            display: none;
+            font-family: 'Doto', 'Roboto', sans-serif;
+            font-size: 2.4rem;
+            font-weight: 900;
+            color: #ffffff;
+            text-align: center;
+            padding: 20px;
+            margin: 0 auto;
+            max-width: 90vw;
+            line-height: 1.4;
+            z-index: 2;
+            position: relative;
+            text-shadow: 0 4px 12px rgba(0,0,0,0.6);
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: fadeInUp 1s ease both;
+        }
+        @media (max-width: 768px) {
+            .hero .spline-bg {
+                display: none !important;
+            }
+            .hero-heading {
+                display: block;
+            }
+        }
+    </style>
+    <style>
+        #calculation-time {
+            font-size: 0.95rem;
+            color: var(--light);
+            margin: 12px 0 0;
+            text-align: center;
+            display: block;
+            width: 100%;
+        }
+    </style>
         </div>
     </section>
 
@@ -232,370 +840,407 @@
     </section>
 
     <script>
-    (function(){
-        // ---------- translations ----------
-        const translations = {
-            en: {
-                brand: "AquaSpatial",
-                nav_features: "Features",
-                nav_predict: "Predict",
-                features_title: "Why Choose Our Solution",
-                features_sub: "Combines GIS, hydrology heuristics and a hybrid ML-corrected model to give practical recommendations.",
-                ft1: "AI + Physics", fd1: "Deterministic runoff estimation combined with residual ML adjustment (if model available).",
-                ft2: "Recharge & Harvest", fd2: "Estimates recharge potential and shows recommended structures & dimensions.",
-                ft3: "Practical Outputs", fd3: "Cost breakdown, payback, feasibility check and maps to help decision making.",
-                ft4: "Local Data", fd4: "Uses rainfall, soil & drainage lookups for site-specific recommendations.",
-                form_title: "Rainwater Harvesting Prediction",
-                form_sub: "Draw your rooftop on the map or enter rooftop area manually. (Slope is handled automatically — no input required.)",
-                label_rooftop: "Rooftop Area (m²)", label_dwellers: "Number of Dwellers", label_roof_material: "Roof Material",
-                roof_metal: "Metal", roof_tiles: "Tiles", roof_concrete: "Concrete", roof_asphalt: "Asphalt",
-                label_location: "Using Current Location", location_note_text: "We will use your browser's location when you submit to look up rainfall & soil.",
-                btn_calculate: "Calculate Prediction",
-                res_recharge: "Artificial Recharge Potential", res_suitability: "Suitability Score", res_harvest_ratio: "Harvest–Demand Ratio",
-                res_aquifer: "Principal Aquifer", res_depth: "Depth to Groundwater", res_rainfall: "Local Rainfall",
-                res_cost_est: "Cost Estimation (approx.)", res_cost_break: "Cost Breakdown", res_feasibility: "Feasibility",
-                res_runoff_gen: "Runoff Generation", res_cost_benefit: "Cost–Benefit", res_recommended_dimensions: "Recommended Dimensions",
-                res_recommended_structure: "Recommended Structure", dim_diameter: "diameter", dim_depth: "depth", dim_length: "length",
-                dim_width: "width", dim_volume: "vol", dim_liters: "Liters", dim_m3: "m³", dim_m: "m",
-                note_det_ml: "Deterministic + ML adjustment", note_higher_better: "Higher means better suitability", note_meet_demand: ">1 means harvested water can meet demand",
-                note_storage: "High demand relative to harvested volume — storage recommended.", payback_years: "years",
-                you_are_here: "You are here", base_cost: "Base", install_cost: "Installation", storage_cost: "Storage", small_no_data: "Data not available",
-                feasible: "Feasible", not_recommended: "Not Recommended", storage_tank_text: "Storage Tank: On-site storage recommended.",
-                recharge_pit: "Recharge Pit", recharge_trench: "Recharge Trench", recharge_well: "Recharge Well", storage_tank: "Storage Tank",
-                annual_savings_prefix: "Annual savings", payback_prefix: "Payback"
-            },
-            hi: {
-                brand: "AquaSpatial", nav_features: "विशेषताएँ", nav_predict: "अनुमान",
-                features_title: "हमारे समाधान को क्यों चुनें", features_sub: "जियोग्राफ़िक, हाइड्रोलॉजी ह्यूरिस्टिक्स और हाइब्रिड ML-सुधारित मॉडल का संयोजन।",
-                ft1: "एआई + भौतिकी", fd1: "नियततात्मक रनऑफ आकलन और अवशिष्ट ML समायोजन।",
-                ft2: "रिचार्ज और संग्रह", fd2: "रिचार्ज क्षमता का अनुमान और अनुशंसित संरचनाएँ व आयाम दिखाता है।",
-                ft3: "व्यावहारिक आउटपुट", fd3: "लागत वितरण, पेबैक, व्यवहार्यता जाँच और मानचित्र।",
-                ft4: "स्थानीय डेटा", fd4: "वर्षा, मिट्टी और ड्रेनेज लुकअप का उपयोग साइट-विशिष्ट अनुशंसाओं के लिए।",
-                form_title: "वर्षा जल संचयन अनुमान", form_sub: "मानचित्र पर छत बनाएं या क्षेत्र मैन्युअली दर्ज करें। (ढलान स्वत: संभाला जाता है।)",
-                label_rooftop: "छत का क्षेत्र (m²)", label_dwellers: "निवासी संख्या", label_roof_material: "छत सामग्री",
-                roof_metal: "धातु", roof_tiles: "टाइल्स", roof_concrete: "कंक्रीट", roof_asphalt: "डामर",
-                label_location: "वर्तमान स्थान का उपयोग", location_note_text: "हम सर्वर पर वर्षा और मिट्टी की जानकारी के लिए ब्राउज़र स्थान का उपयोग करेंगे।",
-                btn_calculate: "अनुमान निकालें",
-                res_recharge: "कृत्रिम रिचार्ज क्षमता", res_suitability: "उपयुक्तता स्कोर", res_harvest_ratio: "संग्रह–मांग अनुपात",
-                res_aquifer: "मुख्य जलभंडार", res_depth: "भूजल गहराई", res_rainfall: "स्थानीय वर्षा",
-                res_cost_est: "लागत अनुमान (अनुमानित)", res_cost_break: "लागत-विभाजन", res_feasibility: "व्यवहार्यता",
-                res_runoff_gen: "रनऑफ उत्पादन", res_cost_benefit: "लागत–लाभ", res_recommended_dimensions: "अनुशंसित आयाम",
-                res_recommended_structure: "अनुशंसित संरचना", dim_diameter: "व्यास", dim_depth: "गहराई", dim_length: "लंबाई",
-                dim_width: "चौड़ाई", dim_volume: "आयतन", dim_liters: "लीटर", dim_m3: "घन मीटर", dim_m: "मी",
-                note_det_ml: "नियततात्मक + ML समायोजन", note_higher_better: "ज्यादा बेहतर उपयुक्तता दर्शाता है", note_meet_demand: ">1 का अर्थ है कि संग्रहित पानी मांग पूरी कर सकता है",
-                note_storage: "संग्रहित मात्रा की तुलना में अधिक मांग — संग्रह टैंक की सिफारिश।", payback_years: "वर्ष",
-                you_are_here: "आप यहाँ हैं", base_cost: "बेस", install_cost: "इंस्टॉलेशन", storage_cost: "स्टोरेज", small_no_data: "डेटा उपलब्ध नहीं",
-                feasible: "व्यावहार्य", not_recommended: "अनुशंसित नहीं", storage_tank_text: "स्टोरेज टैंक: तत्काल उपयोग के लिए ऑन-साइट भंडारण।",
-                recharge_pit: "रिचार्ज पिट", recharge_trench: "रिचार्ज खाँचा", recharge_well: "रिचार्ज कुआँ", storage_tank: "स्टोरेज टैंक",
-                annual_savings_prefix: "वार्षिक बचत", payback_prefix: "पेबैक"
-            },
-            ta: {
-                brand: "AquaSpatial", nav_features: "வசதிகள்", nav_predict: "கணிப்பு",
-                features_title: "என் தீர்வை ஏன் தேர்ந்தெடுப்பது", features_sub: "GIS, ஹைட்ராலஜி உகந்த விதிகள் மற்றும் ஹைப்ரிட் ML மாதிரி ஒருங்கிணைப்பு.",
-                ft1: "ஏ.ஐ + இயற்பியல்", fd1: "தரநிர்ணய ஓவர்ஃப்லோ மதிப்பீடு மற்றும் ML சரி.",
-                ft2: "ரீசார்ஜ் & சேகரிப்பு", fd2: "ரீசார்ஜ் திறனை கணக்கிடுகிறது மற்றும் பரிந்துரைக்கப்படும் கட்டமைப்புகள் & பரிமாணங்களை காட்டுகிறது.",
-                ft3: "பயன்பாட்டு விளைவுகள்", fd3: "செலவு உடைமை, மீட்டுமறிவு, சாத்தியக்கூறுகள் மற்றும் வரைபடங்கள்.",
-                ft4: "உள்ளூர் தரவு", fd4: "மழை, மண் மற்றும் வடிகால் தேடல்களைப் பயன்படுத்துகிறது.",
-                form_title: "மழைநீர் சேகரிப்பு கணிப்பு", form_sub: "வரைய அல்லது பரப்பை உள்ளிடவும். (சாய்வு தானாகவே கருதப்படுகிறது.)",
-                label_rooftop: "கூரை பரப்பு (m²)", label_dwellers: "வாசிகள்", label_roof_material: "கூரை பொருள்",
-                roof_metal: "உலோகம்", roof_tiles: "தகரை", roof_concrete: "கான்கிரீட்", roof_asphalt: "அஸ்ஃபால்ட்",
-                label_location: "தற்போதைய இடத்தைப் பயன்படுத்துகிறது", location_note_text: "கணக்கீட்டிற்காக உங்கள் இடத்தைப் பயன்படுத்துவோம்.",
-                btn_calculate: "கணிக்கவும்",
-                res_recharge: "மீண்டும் நிரப்பும் திறன்", res_suitability: "சார்ந்தக்கூறல் மதிப்பெண்", res_harvest_ratio: "இடைமுக–அப்பிளிக்கை விகிதம்",
-                res_aquifer: "முக்கிய நீர்தொட்டி", res_depth: "தண்ணீர் நிலையின் ஆழம்", res_rainfall: "உள்ளூர் மழை",
-                res_cost_est: "செலவு கணிப்பு (அனுமானம்)", res_cost_break: "செலவு விவரம்", res_feasibility: "சாத்தியக்கூறுகள்",
-                res_runoff_gen: "ஓவர்ஃப்ளோ உருவாக்கம்", res_cost_benefit: "செலவு–நன்மை", res_recommended_dimensions: "பரிந்துரைக்கப்பட்ட பரிமாணங்கள்",
-                res_recommended_structure: "பரிந்துரைக்கப்பட்ட கட்டமைப்பு", dim_diameter: "வெலிமை", dim_depth: "ஆழம்", dim_length: "நீளம்",
-                dim_width: "அகலம்", dim_volume: "அளவு", dim_liters: "லிட்டர்கள்", dim_m3: "மீ³", dim_m: "மீ",
-                note_det_ml: "நியாயமான + ML சரிசெய்தல்", note_higher_better: "உயர்ந்தால் சிறந்த பொருத்தம்", note_meet_demand: ">1 என்பது தேவை பூர்த்தி செய்யலாம் என்று அர்த்தம்",
-                note_storage: "சேமிப்பு பரிந்துரை.", payback_years: "ஆண்டுகள்",
-                you_are_here: "நீங்கள் இங்கே", base_cost: "அடிப்படை", install_cost: "நصبவு", storage_cost: "சேமிப்பு", small_no_data: "தரவு கிடையாது",
-                feasible: "சாத்தியமானது", not_recommended: "பரிந்துரைக்கப்படவில்லை", storage_tank_text: "சேமிப்பு தொட்டி பரிந்துரை.",
-                recharge_pit: "ரீசார்ஜ் பிக்", recharge_trench: "ரீசார்ஜ் கால்வாய்", recharge_well: "ரீசார்ஜ் கிணறு", storage_tank: "சேமிப்பு தொட்டி",
-                annual_savings_prefix: "ஆண்டு சேமிப்பு", payback_prefix: "மீட்டல்"
+        // Hamburger menu toggle for mobile
+        (function () {
+            function closeDropdownOnClickOutside(e) {
+                const dropdown = document.getElementById('nav-dropdown');
+                const hamburger = document.getElementById('hamburger');
+                if (!dropdown || !hamburger) return;
+                if (!dropdown.contains(e.target) && !hamburger.contains(e.target)) {
+                    dropdown.classList.remove('open');
+                    hamburger.setAttribute('aria-expanded', 'false');
+                }
             }
-        };
-
-        // ---------- state ----------
-        let currentLang = 'en';
-        let localLang = 'en';
-        window.lastAnalysis = null; // to store last backend response for re-render on language change
-
-        // i18n helpers
-        function t(key) {
-            if (!key) return '';
-            const lang = (currentLang === 'local') ? localLang : currentLang;
-            const bucket = translations[lang] || translations['en'];
-            return bucket[key] !== undefined ? bucket[key] : (translations['en'][key] !== undefined ? translations['en'][key] : key);
-        }
-
-        function applyStaticTranslations() {
-            document.getElementById('brand-text').innerText = t('brand');
-            document.getElementById('nav-features').innerText = t('nav_features');
-            document.getElementById('nav-predict').innerText = t('nav_predict');
-
-            document.getElementById('features-title').innerText = t('features_title');
-            document.getElementById('features-sub').innerText = t('features_sub');
-
-            document.querySelectorAll('.f-title').forEach(el => {
-                const key = el.getAttribute('data-key');
-                if (key) el.innerText = t(key);
-            });
-            document.querySelectorAll('.f-desc').forEach(el => {
-                const key = el.getAttribute('data-key');
-                if (key) el.innerText = t(key);
-            });
-
-            document.getElementById('form-title').innerText = t('form_title');
-            document.getElementById('form-sub').innerText = t('form_sub');
-
-            // translate form labels & buttons (elements with data-key)
-            document.querySelectorAll('[data-key]').forEach(el => {
-                const key = el.getAttribute('data-key');
-                if (key && el.tagName.toLowerCase() !== 'option') el.innerText = t(key);
-            });
-
-            // translate roof options
-            document.querySelectorAll('#roof_material option').forEach(opt => {
-                const key = opt.getAttribute('data-key');
-                if (key) opt.innerText = t(key);
-            });
-
-            updateLangButtons();
-            updateUserMarkerPopup();
-        }
-
-        function updateLangButtons() {
-            const enBtn = document.getElementById('lang-en');
-            const hiBtn = document.getElementById('lang-hi');
-            const localBtn = document.getElementById('lang-local');
-            [enBtn, hiBtn, localBtn].forEach(b => b.classList.remove('active'));
-            if (currentLang === 'en') enBtn.classList.add('active');
-            else if (currentLang === 'hi') hiBtn.classList.add('active');
-            else localBtn.classList.add('active');
-
-            // ensure en/hi labels remain correct
-            enBtn.innerText = 'English';
-            hiBtn.innerText = 'हिंदी';
-            // local button label set based on detected localLang
-            if (localLang === 'ta') localBtn.innerText = 'தமிழ்';
-            else if (localLang === 'hi') localBtn.innerText = 'हिंदी';
-            else localBtn.innerText = (localLang === 'en') ? 'English' : 'Local';
-        }
-
-        // pick a local language heuristically from lat/lon
-        function pickLocalLanguageFromLatLon(lat, lon) {
-            if (lat >= 8 && lat <= 13 && lon >= 76 && lon <= 80) return 'ta'; // Tamil Nadu
-            if (lat >= 7 && lat <= 11 && lon >= 74 && lon <= 77) return 'ml'; // Kerala (not provided -> fallback to hi)
-            if (lat >= 12 && lat <= 19 && lon >= 76 && lon <= 84) return 'hi'; // AP/TG / fallback to hi
-            if (lat >= 19 && lat <= 23 && lon >= 72 && lon <= 78) return 'hi'; // Maharashtra/KT fallback hi
-            if (lat >= 22 && lat <= 27 && lon >= 86 && lon <= 90) return 'hi'; // West Bengal fallback hi
-            if (lat >= 6 && lat <= 37 && lon >= 68 && lon <= 97) return 'hi'; // anywhere India fallback hi
-            return 'en';
-        }
-
-        async function detectLocalLanguage() {
-            try {
-                const pos = await new Promise((resolve, reject) => {
-                    if (!navigator.geolocation) return reject('no geolocation');
-                    navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 3000 });
+            document.addEventListener('DOMContentLoaded', function () {
+                const hamburger = document.getElementById('hamburger');
+                const dropdown = document.getElementById('nav-dropdown');
+                if (!hamburger || !dropdown) return;
+                hamburger.addEventListener('click', function (e) {
+                    dropdown.classList.toggle('open');
+                    hamburger.setAttribute('aria-expanded', dropdown.classList.contains('open') ? 'true' : 'false');
                 });
-                const lat = pos.coords.latitude, lon = pos.coords.longitude;
-                localLang = pickLocalLanguageFromLatLon(lat, lon);
-                // map unsupported codes to available (we only have en, hi, ta)
-                if (!['en','hi','ta'].includes(localLang)) {
-                    localLang = localLang === 'ta' ? 'ta' : 'hi';
-                }
-                window._user_lat = lat; window._user_lon = lon;
-            } catch (e) {
-                // fallback to navigator.language prefix
-                const nav = navigator.language || navigator.userLanguage || 'en';
-                if (nav.startsWith('ta')) localLang = 'ta';
-                else if (nav.startsWith('hi')) localLang = 'hi';
-                else localLang = 'en';
-            }
-            updateLangButtons();
-            return localLang;
-        }
-
-        // ---------- map & draw ----------
-        let map, drawnItems, drawControl, userMarker;
-        function initMap() {
-            map = L.map('map').setView([20.5937, 78.9629], 13);
-            L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-                attribution: 'Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics',
-                maxZoom: 19,
-                detectRetina: true
-            }).addTo(map);
-
-            drawnItems = new L.FeatureGroup();
-            map.addLayer(drawnItems);
-
-            drawControl = new L.Control.Draw({
-                edit: { featureGroup: drawnItems },
-                draw: { polygon:true, polyline:false, rectangle:false, circle:false, marker:false, circlemarker:false }
-            });
-            map.addControl(drawControl);
-
-            // try geolocation
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(pos => {
-                    const lat = pos.coords.latitude, lng = pos.coords.longitude;
-                    try { map.setView([lat, lng], 17); } catch (e) {}
-                    userMarker = L.marker([lat, lng]).addTo(map)
-                        .bindPopup(t('you_are_here') || 'You are here')
-                        .openPopup();
-                    window._user_lat = lat; window._user_lon = lng;
-                }, err => { /* ignore */ }, { enableHighAccuracy: true, timeout: 5000 });
-            }
-
-            map.on(L.Draw.Event.CREATED, function(event) {
-                const layer = event.layer;
-                drawnItems.clearLayers();
-                drawnItems.addLayer(layer);
-
-                const geo = layer.toGeoJSON();
-                let area = 0;
-                try {
-                    if (typeof turf !== 'undefined' && turf.area) {
-                        area = turf.area(geo);
-                    } else {
-                        throw new Error('turf missing');
+                // Close dropdown on link click (mobile)
+                dropdown.querySelectorAll('a').forEach(link => {
+                    link.addEventListener('click', function () {
+                        dropdown.classList.remove('open');
+                        hamburger.setAttribute('aria-expanded', 'false');
+                    });
+                });
+                // Click outside closes
+                document.addEventListener('mousedown', closeDropdownOnClickOutside);
+                window.addEventListener('resize', function () {
+                    // Always close on resize to desktop
+                    if (window.innerWidth > 768) {
+                        dropdown.classList.remove('open');
+                        hamburger.setAttribute('aria-expanded', 'false');
                     }
-                } catch (e) {
-                    let latlngs = [];
-                    if (layer.getLatLngs) {
-                        const raw = layer.getLatLngs();
-                        if (Array.isArray(raw) && raw.length) latlngs = Array.isArray(raw[0]) ? raw[0] : raw;
-                    }
-                    if (L.GeometryUtil && L.GeometryUtil.geodesicArea) area = L.GeometryUtil.geodesicArea(latlngs);
-                    else area = 0;
-                }
-
-                window._last_polygon = { area_m2: area, geojson: geo };
-                const rooftopInput = document.getElementById('rooftop_area');
-                if (rooftopInput) rooftopInput.value = Number(area || 0).toFixed(2);
-                const popupHtml = `<strong>${t('label_rooftop') || 'Rooftop Area'}:</strong> ${Number(area).toLocaleString(undefined, {maximumFractionDigits:2})} m²`;
-                layer.bindPopup(popupHtml).openPopup();
+                });
             });
-        }
-
-        function updateUserMarkerPopup() {
-            if (!userMarker) return;
-            const txt = t('you_are_here') || 'You are here';
-            const popup = userMarker.getPopup();
-            if (popup) popup.setContent(txt);
-            else userMarker.bindPopup(txt);
-        }
-
-        // ---------- helpers for rendering results ----------
-        function translateStructureType(type) {
-            if (!type) return t('small_no_data');
-            const map = {
-                'Recharge Pit': t('recharge_pit'),
-                'Recharge Trench': t('recharge_trench'),
-                'Recharge Well': t('recharge_well'),
-                'Storage Tank': t('storage_tank'),
-                'Recharge Pit / Trench': t('recharge_pit')
+        })();
+        (function () {
+            // ---------- translations ----------
+            const translations = {
+                en: {
+                    brand: "AquaSpatial",
+                    nav_features: "Features",
+                    nav_predict: "Predict",
+                    features_title: "Why Choose Our Solution",
+                    features_sub: "Combines GIS, hydrology heuristics and a hybrid ML-corrected model to give practical recommendations.",
+                    ft1: "AI + Physics", fd1: "Deterministic runoff estimation combined with residual ML adjustment (if model available).",
+                    ft2: "Recharge & Harvest", fd2: "Estimates recharge potential and shows recommended structures & dimensions.",
+                    ft3: "Practical Outputs", fd3: "Cost breakdown, payback, feasibility check and maps to help decision making.",
+                    ft4: "Local Data", fd4: "Uses rainfall, soil & drainage lookups for site-specific recommendations.",
+                    form_title: "Rainwater Harvesting Prediction",
+                    form_sub: "Draw your rooftop on the map or enter rooftop area manually. (Slope is handled automatically — no input required.)",
+                    label_rooftop: "Rooftop Area (m²)", label_dwellers: "Number of Dwellers", label_roof_material: "Roof Material",
+                    roof_metal: "Metal", roof_tiles: "Tiles", roof_concrete: "Concrete", roof_asphalt: "Asphalt",
+                    label_location: "Using Current Location", location_note_text: "We will use your browser's location when you submit to look up rainfall & soil.",
+                    btn_calculate: "Calculate Prediction",
+                    res_recharge: "Artificial Recharge Potential", res_suitability: "Suitability Score", res_harvest_ratio: "Harvest–Demand Ratio",
+                    res_aquifer: "Principal Aquifer", res_depth: "Depth to Groundwater", res_rainfall: "Local Rainfall",
+                    res_cost_est: "Cost Estimation (approx.)", res_cost_break: "Cost Breakdown", res_feasibility: "Feasibility",
+                    res_runoff_gen: "Runoff Generation", res_cost_benefit: "Cost–Benefit", res_recommended_dimensions: "Recommended Dimensions",
+                    res_recommended_structure: "Recommended Structure", dim_diameter: "diameter", dim_depth: "depth", dim_length: "length",
+                    dim_width: "width", dim_volume: "vol", dim_liters: "Liters", dim_m3: "m³", dim_m: "m",
+                    note_det_ml: "Deterministic + ML adjustment", note_higher_better: "Higher means better suitability", note_meet_demand: ">1 means harvested water can meet demand",
+                    note_storage: "High demand relative to harvested volume — storage recommended.", payback_years: "years",
+                    you_are_here: "You are here", base_cost: "Base", install_cost: "Installation", storage_cost: "Storage", small_no_data: "Data not available",
+                    feasible: "Feasible", not_recommended: "Not Recommended", storage_tank_text: "Storage Tank: On-site storage recommended.",
+                    recharge_pit: "Recharge Pit", recharge_trench: "Recharge Trench", recharge_well: "Recharge Well", storage_tank: "Storage Tank",
+                    annual_savings_prefix: "Annual savings", payback_prefix: "Payback"
+                },
+                hi: {
+                    brand: "AquaSpatial", nav_features: "विशेषताएँ", nav_predict: "अनुमान",
+                    features_title: "हमारे समाधान को क्यों चुनें", features_sub: "जियोग्राफ़िक, हाइड्रोलॉजी ह्यूरिस्टिक्स और हाइब्रिड ML-सुधारित मॉडल का संयोजन।",
+                    ft1: "एआई + भौतिकी", fd1: "नियततात्मक रनऑफ आकलन और अवशिष्ट ML समायोजन।",
+                    ft2: "रिचार्ज और संग्रह", fd2: "रिचार्ज क्षमता का अनुमान और अनुशंसित संरचनाएँ व आयाम दिखाता है।",
+                    ft3: "व्यावहारिक आउटपुट", fd3: "लागत वितरण, पेबैक, व्यवहार्यता जाँच और मानचित्र।",
+                    ft4: "स्थानीय डेटा", fd4: "वर्षा, मिट्टी और ड्रेनेज लुकअप का उपयोग साइट-विशिष्ट अनुशंसाओं के लिए।",
+                    form_title: "वर्षा जल संचयन अनुमान", form_sub: "मानचित्र पर छत बनाएं या क्षेत्र मैन्युअली दर्ज करें। (ढलान स्वत: संभाला जाता है।)",
+                    label_rooftop: "छत का क्षेत्र (m²)", label_dwellers: "निवासी संख्या", label_roof_material: "छत सामग्री",
+                    roof_metal: "धातु", roof_tiles: "टाइल्स", roof_concrete: "कंक्रीट", roof_asphalt: "डामर",
+                    label_location: "वर्तमान स्थान का उपयोग", location_note_text: "हम सर्वर पर वर्षा और मिट्टी की जानकारी के लिए ब्राउज़र स्थान का उपयोग करेंगे।",
+                    btn_calculate: "अनुमान निकालें",
+                    res_recharge: "कृत्रिम रिचार्ज क्षमता", res_suitability: "उपयुक्तता स्कोर", res_harvest_ratio: "संग्रह–मांग अनुपात",
+                    res_aquifer: "मुख्य जलभंडार", res_depth: "भूजल गहराई", res_rainfall: "स्थानीय वर्षा",
+                    res_cost_est: "लागत अनुमान (अनुमानित)", res_cost_break: "लागत-विभाजन", res_feasibility: "व्यवहार्यता",
+                    res_runoff_gen: "रनऑफ उत्पादन", res_cost_benefit: "लागत–लाभ", res_recommended_dimensions: "अनुशंसित आयाम",
+                    res_recommended_structure: "अनुशंसित संरचना", dim_diameter: "व्यास", dim_depth: "गहराई", dim_length: "लंबाई",
+                    dim_width: "चौड़ाई", dim_volume: "आयतन", dim_liters: "लीटर", dim_m3: "घन मीटर", dim_m: "मी",
+                    note_det_ml: "नियततात्मक + ML समायोजन", note_higher_better: "ज्यादा बेहतर उपयुक्तता दर्शाता है", note_meet_demand: ">1 का अर्थ है कि संग्रहित पानी मांग पूरी कर सकता है",
+                    note_storage: "संग्रहित मात्रा की तुलना में अधिक मांग — संग्रह टैंक की सिफारिश।", payback_years: "वर्ष",
+                    you_are_here: "आप यहाँ हैं", base_cost: "बेस", install_cost: "इंस्टॉलेशन", storage_cost: "स्टोरेज", small_no_data: "डेटा उपलब्ध नहीं",
+                    feasible: "व्यावहार्य", not_recommended: "अनुशंसित नहीं", storage_tank_text: "स्टोरेज टैंक: तत्काल उपयोग के लिए ऑन-साइट भंडारण।",
+                    recharge_pit: "रिचार्ज पिट", recharge_trench: "रिचार्ज खाँचा", recharge_well: "रिचार्ज कुआँ", storage_tank: "स्टोरेज टैंक",
+                    annual_savings_prefix: "वार्षिक बचत", payback_prefix: "पेबैक"
+                },
+                ta: {
+                    brand: "AquaSpatial", nav_features: "வசதிகள்", nav_predict: "கணிப்பு",
+                    features_title: "என் தீர்வை ஏன் தேர்ந்தெடுப்பது", features_sub: "GIS, ஹைட்ராலஜி உகந்த விதிகள் மற்றும் ஹைப்ரிட் ML மாதிரி ஒருங்கிணைப்பு.",
+                    ft1: "ஏ.ஐ + இயற்பியல்", fd1: "தரநிர்ணய ஓவர்ஃப்லோ மதிப்பீடு மற்றும் ML சரி.",
+                    ft2: "ரீசார்ஜ் & சேகரிப்பு", fd2: "ரீசார்ஜ் திறனை கணக்கிடுகிறது மற்றும் பரிந்துரைக்கப்படும் கட்டமைப்புகள் & பரிமாணங்களை காட்டுகிறது.",
+                    ft3: "பயன்பாட்டு விளைவுகள்", fd3: "செலவு உடைமை, மீட்டுமறிவு, சாத்தியக்கூறுகள் மற்றும் வரைபடங்கள்.",
+                    ft4: "உள்ளூர் தரவு", fd4: "மழை, மண் மற்றும் வடிகால் தேடல்களைப் பயன்படுத்துகிறது.",
+                    form_title: "மழைநீர் சேகரிப்பு கணிப்பு", form_sub: "வரைய அல்லது பரப்பை உள்ளிடவும். (சாய்வு தானாகவே கருதப்படுகிறது.)",
+                    label_rooftop: "கூரை பரப்பு (m²)", label_dwellers: "வாசிகள்", label_roof_material: "கூரை பொருள்",
+                    roof_metal: "உலோகம்", roof_tiles: "தகரை", roof_concrete: "கான்கிரீட்", roof_asphalt: "அஸ்ஃபால்ட்",
+                    label_location: "தற்போதைய இடத்தைப் பயன்படுத்துகிறது", location_note_text: "கணக்கீட்டிற்காக உங்கள் இடத்தைப் பயன்படுத்துவோம்.",
+                    btn_calculate: "கணிக்கவும்",
+                    res_recharge: "மீண்டும் நிரப்பும் திறன்", res_suitability: "சார்ந்தக்கூறல் மதிப்பெண்", res_harvest_ratio: "இடைமுக–அப்பிளிக்கை விகிதம்",
+                    res_aquifer: "முக்கிய நீர்தொட்டி", res_depth: "தண்ணீர் நிலையின் ஆழம்", res_rainfall: "உள்ளூர் மழை",
+                    res_cost_est: "செலவு கணிப்பு (அனுமானம்)", res_cost_break: "செலவு விவரம்", res_feasibility: "சாத்தியக்கூறுகள்",
+                    res_runoff_gen: "ஓவர்ஃப்ளோ உருவாக்கம்", res_cost_benefit: "செலவு–நன்மை", res_recommended_dimensions: "பரிந்துரைக்கப்பட்ட பரிமாணங்கள்",
+                    res_recommended_structure: "பரிந்துரைக்கப்பட்ட கட்டமைப்பு", dim_diameter: "வெலிமை", dim_depth: "ஆழம்", dim_length: "நீளம்",
+                    dim_width: "அகலம்", dim_volume: "அளவு", dim_liters: "லிட்டர்கள்", dim_m3: "மீ³", dim_m: "மீ",
+                    note_det_ml: "நியாயமான + ML சரிசெய்தல்", note_higher_better: "உயர்ந்தால் சிறந்த பொருத்தம்", note_meet_demand: ">1 என்பது தேவை பூர்த்தி செய்யலாம் என்று அர்த்தம்",
+                    note_storage: "சேமிப்பு பரிந்துரை.", payback_years: "ஆண்டுகள்",
+                    you_are_here: "நீங்கள் இங்கே", base_cost: "அடிப்படை", install_cost: "நصبவு", storage_cost: "சேமிப்பு", small_no_data: "தரவு கிடையாது",
+                    feasible: "சாத்தியமானது", not_recommended: "பரிந்துரைக்கப்படவில்லை", storage_tank_text: "சேமிப்பு தொட்டி பரிந்துரை.",
+                    recharge_pit: "ரீசார்ஜ் பிக்", recharge_trench: "ரீசார்ஜ் கால்வாய்", recharge_well: "ரீசார்ஜ் கிணறு", storage_tank: "சேமிப்பு தொட்டி",
+                    annual_savings_prefix: "ஆண்டு சேமிப்பு", payback_prefix: "மீட்டல்"
+                }
             };
-            return map[type] || type;
-        }
 
-        function renderDimensionsHTML(dimObj) {
-            if (!dimObj || typeof dimObj !== 'object') return `<div class="small-note">${t('small_no_data')}</div>`;
-            let html = '<ul class="dimensions-list">';
-            // single-structure object
-            const isSingle = !!dimObj.type || !!dimObj.depth_m || !!dimObj.diameter_m || !!dimObj.length_m;
-            if (isSingle) {
-                const v = dimObj;
-                html += `<li><strong>${translateStructureType(v.type || 'Structure')}:</strong> `;
-                const parts = [];
-                if (v.diameter_m) parts.push(`${t('dim_diameter')} ${v.diameter_m} ${t('dim_m')}`);
-                if (v.depth_m) parts.push(`${t('dim_depth')} ${v.depth_m} ${t('dim_m')}`);
-                if (v.length_m) parts.push(`${t('dim_length')} ${v.length_m} ${t('dim_m')}`);
-                if (v.width_m) parts.push(`${t('dim_width')} ${v.width_m} ${t('dim_m')}`);
-                if (v.design_volume_m3) parts.push(`${t('dim_volume')}: ${v.design_volume_m3} ${t('dim_m3')}`);
-                if (v.volume_liters) parts.push(`${v.volume_liters} ${t('dim_liters')}`);
-                html += parts.join(', ');
-                if (v.details) html += ` — ${v.details}`;
-                html += '</li>';
-            } else {
-                Object.keys(dimObj).forEach(k => {
-                    const v = dimObj[k];
-                    if (typeof v === 'object') {
-                        html += `<li><strong>${translateStructureType(v.type || k)}:</strong> `;
-                        const parts = [];
-                        if (v.diameter_m) parts.push(`${t('dim_diameter')} ${v.diameter_m} ${t('dim_m')}`);
-                        if (v.depth_m) parts.push(`${t('dim_depth')} ${v.depth_m} ${t('dim_m')}`);
-                        if (v.length_m) parts.push(`${t('dim_length')} ${v.length_m} ${t('dim_m')}`);
-                        if (v.width_m) parts.push(`${t('dim_width')} ${v.width_m} ${t('dim_m')}`);
-                        if (v.design_volume_m3) parts.push(`${t('dim_volume')}: ${v.design_volume_m3} ${t('dim_m3')}`);
-                        if (v.volume_liters) parts.push(`${v.volume_liters} ${t('dim_liters')}`);
-                        html += parts.join(', ');
-                        if (v.notes) html += ` — ${v.notes}`;
-                        html += '</li>';
-                    } else {
-                        html += `<li><strong>${k}:</strong> ${String(v)}</li>`;
+            // ---------- state ----------
+            let currentLang = 'en';
+            let localLang = 'en';
+            window.lastAnalysis = null; // to store last backend response for re-render on language change
+
+            // i18n helpers
+            function t(key) {
+                if (!key) return '';
+                const lang = (currentLang === 'local') ? localLang : currentLang;
+                const bucket = translations[lang] || translations['en'];
+                return bucket[key] !== undefined ? bucket[key] : (translations['en'][key] !== undefined ? translations['en'][key] : key);
+            }
+
+            function applyStaticTranslations() {
+                document.getElementById('brand-text').innerText = t('brand');
+                document.getElementById('nav-features').innerText = t('nav_features');
+                document.getElementById('nav-predict').innerText = t('nav_predict');
+
+                document.getElementById('features-title').innerText = t('features_title');
+                document.getElementById('features-sub').innerText = t('features_sub');
+
+                document.querySelectorAll('.f-title').forEach(el => {
+                    const key = el.getAttribute('data-key');
+                    if (key) el.innerText = t(key);
+                });
+                document.querySelectorAll('.f-desc').forEach(el => {
+                    const key = el.getAttribute('data-key');
+                    if (key) el.innerText = t(key);
+                });
+
+                document.getElementById('form-title').innerText = t('form_title');
+                document.getElementById('form-sub').innerText = t('form_sub');
+
+                // translate form labels & buttons (elements with data-key)
+                document.querySelectorAll('[data-key]').forEach(el => {
+                    const key = el.getAttribute('data-key');
+                    if (key && el.tagName.toLowerCase() !== 'option') el.innerText = t(key);
+                });
+
+                // translate roof options
+                document.querySelectorAll('#roof_material option').forEach(opt => {
+                    const key = opt.getAttribute('data-key');
+                    if (key) opt.innerText = t(key);
+                });
+
+                updateLangButtons();
+                updateUserMarkerPopup();
+            }
+
+            function updateLangButtons() {
+                const enBtn = document.getElementById('lang-en');
+                const hiBtn = document.getElementById('lang-hi');
+                const localBtn = document.getElementById('lang-local');
+                [enBtn, hiBtn, localBtn].forEach(b => b.classList.remove('active'));
+                if (currentLang === 'en') enBtn.classList.add('active');
+                else if (currentLang === 'hi') hiBtn.classList.add('active');
+                else localBtn.classList.add('active');
+
+                // ensure en/hi labels remain correct
+                enBtn.innerText = 'English';
+                hiBtn.innerText = 'हिंदी';
+                // local button label set based on detected localLang
+                if (localLang === 'ta') localBtn.innerText = 'தமிழ்';
+                else if (localLang === 'hi') localBtn.innerText = 'हिंदी';
+                else localBtn.innerText = (localLang === 'en') ? 'English' : 'Local';
+            }
+
+            // pick a local language heuristically from lat/lon
+            function pickLocalLanguageFromLatLon(lat, lon) {
+                if (lat >= 8 && lat <= 13 && lon >= 76 && lon <= 80) return 'ta'; // Tamil Nadu
+                if (lat >= 7 && lat <= 11 && lon >= 74 && lon <= 77) return 'ml'; // Kerala (not provided -> fallback to hi)
+                if (lat >= 12 && lat <= 19 && lon >= 76 && lon <= 84) return 'hi'; // AP/TG / fallback to hi
+                if (lat >= 19 && lat <= 23 && lon >= 72 && lon <= 78) return 'hi'; // Maharashtra/KT fallback hi
+                if (lat >= 22 && lat <= 27 && lon >= 86 && lon <= 90) return 'hi'; // West Bengal fallback hi
+                if (lat >= 6 && lat <= 37 && lon >= 68 && lon <= 97) return 'hi'; // anywhere India fallback hi
+                return 'en';
+            }
+
+            async function detectLocalLanguage() {
+                try {
+                    const pos = await new Promise((resolve, reject) => {
+                        if (!navigator.geolocation) return reject('no geolocation');
+                        navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 3000 });
+                    });
+                    const lat = pos.coords.latitude, lon = pos.coords.longitude;
+                    localLang = pickLocalLanguageFromLatLon(lat, lon);
+                    // map unsupported codes to available (we only have en, hi, ta)
+                    if (!['en', 'hi', 'ta'].includes(localLang)) {
+                        localLang = localLang === 'ta' ? 'ta' : 'hi';
                     }
+                    window._user_lat = lat; window._user_lon = lon;
+                } catch (e) {
+                    // fallback to navigator.language prefix
+                    const nav = navigator.language || navigator.userLanguage || 'en';
+                    if (nav.startsWith('ta')) localLang = 'ta';
+                    else if (nav.startsWith('hi')) localLang = 'hi';
+                    else localLang = 'en';
+                }
+                updateLangButtons();
+                return localLang;
+            }
+
+            // ---------- map & draw ----------
+            let map, drawnItems, drawControl, userMarker;
+            function initMap() {
+                map = L.map('map').setView([20.5937, 78.9629], 13);
+                L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                    attribution: 'Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics',
+                    maxZoom: 19,
+                    detectRetina: true
+                }).addTo(map);
+
+                drawnItems = new L.FeatureGroup();
+                map.addLayer(drawnItems);
+
+                drawControl = new L.Control.Draw({
+                    edit: { featureGroup: drawnItems },
+                    draw: { polygon: true, polyline: false, rectangle: false, circle: false, marker: false, circlemarker: false }
+                });
+                map.addControl(drawControl);
+
+                // try geolocation
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(pos => {
+                        const lat = pos.coords.latitude, lng = pos.coords.longitude;
+                        try { map.setView([lat, lng], 17); } catch (e) { }
+                        userMarker = L.marker([lat, lng]).addTo(map)
+                            .bindPopup(t('you_are_here') || 'You are here')
+                            .openPopup();
+                        window._user_lat = lat; window._user_lon = lng;
+                    }, err => { /* ignore */ }, { enableHighAccuracy: true, timeout: 5000 });
+                }
+
+                map.on(L.Draw.Event.CREATED, function (event) {
+                    const layer = event.layer;
+                    drawnItems.clearLayers();
+                    drawnItems.addLayer(layer);
+
+                    const geo = layer.toGeoJSON();
+                    let area = 0;
+                    try {
+                        if (typeof turf !== 'undefined' && turf.area) {
+                            area = turf.area(geo);
+                        } else {
+                            throw new Error('turf missing');
+                        }
+                    } catch (e) {
+                        let latlngs = [];
+                        if (layer.getLatLngs) {
+                            const raw = layer.getLatLngs();
+                            if (Array.isArray(raw) && raw.length) latlngs = Array.isArray(raw[0]) ? raw[0] : raw;
+                        }
+                        if (L.GeometryUtil && L.GeometryUtil.geodesicArea) area = L.GeometryUtil.geodesicArea(latlngs);
+                        else area = 0;
+                    }
+
+                    window._last_polygon = { area_m2: area, geojson: geo };
+                    const rooftopInput = document.getElementById('rooftop_area');
+                    if (rooftopInput) rooftopInput.value = Number(area || 0).toFixed(2);
+                    const popupHtml = `<strong>${t('label_rooftop') || 'Rooftop Area'}:</strong> ${Number(area).toLocaleString(undefined, { maximumFractionDigits: 2 })} m²`;
+                    layer.bindPopup(popupHtml).openPopup();
                 });
             }
-            html += '</ul>';
-            return html;
-        }
 
-        function fmtNumber(v, d=2) {
-            if (v === null || v === undefined) return t('small_no_data');
-            const n = Number(v);
-            if (Number.isNaN(n)) return String(v);
-            return n.toLocaleString(undefined, {minimumFractionDigits:d, maximumFractionDigits:d});
-        }
+            function updateUserMarkerPopup() {
+                if (!userMarker) return;
+                const txt = t('you_are_here') || 'You are here';
+                const popup = userMarker.getPopup();
+                if (popup) popup.setContent(txt);
+                else userMarker.bindPopup(txt);
+            }
 
-        function fmtPaybackYears(value) {
-            if (value === null || value === undefined) return 'N/A';
-            const yrs = t('payback_years') || 'years';
-            return `${value} ${yrs}`;
-        }
+            // ---------- helpers for rendering results ----------
+            function translateStructureType(type) {
+                if (!type) return t('small_no_data');
+                const map = {
+                    'Recharge Pit': t('recharge_pit'),
+                    'Recharge Trench': t('recharge_trench'),
+                    'Recharge Well': t('recharge_well'),
+                    'Storage Tank': t('storage_tank'),
+                    'Recharge Pit / Trench': t('recharge_pit')
+                };
+                return map[type] || type;
+            }
 
-        // Render results from the lastAnalysis object (reusable on language change)
-        function renderResultsFromData(lastData) {
-            if (!lastData) return;
-            const outputs = lastData.outputs || {};
-            const analysis = outputs.analysis_results || {};
+            function renderDimensionsHTML(dimObj) {
+                if (!dimObj || typeof dimObj !== 'object') return `<div class="small-note">${t('small_no_data')}</div>`;
+                let html = '<ul class="dimensions-list">';
+                // single-structure object
+                const isSingle = !!dimObj.type || !!dimObj.depth_m || !!dimObj.diameter_m || !!dimObj.length_m;
+                if (isSingle) {
+                    const v = dimObj;
+                    html += `<li><strong>${translateStructureType(v.type || 'Structure')}:</strong> `;
+                    const parts = [];
+                    if (v.diameter_m) parts.push(`${t('dim_diameter')} ${v.diameter_m} ${t('dim_m')}`);
+                    if (v.depth_m) parts.push(`${t('dim_depth')} ${v.depth_m} ${t('dim_m')}`);
+                    if (v.length_m) parts.push(`${t('dim_length')} ${v.length_m} ${t('dim_m')}`);
+                    if (v.width_m) parts.push(`${t('dim_width')} ${v.width_m} ${t('dim_m')}`);
+                    if (v.design_volume_m3) parts.push(`${t('dim_volume')}: ${v.design_volume_m3} ${t('dim_m3')}`);
+                    if (v.volume_liters) parts.push(`${v.volume_liters} ${t('dim_liters')}`);
+                    html += parts.join(', ');
+                    if (v.details) html += ` — ${v.details}`;
+                    html += '</li>';
+                } else {
+                    Object.keys(dimObj).forEach(k => {
+                        const v = dimObj[k];
+                        if (typeof v === 'object') {
+                            html += `<li><strong>${translateStructureType(v.type || k)}:</strong> `;
+                            const parts = [];
+                            if (v.diameter_m) parts.push(`${t('dim_diameter')} ${v.diameter_m} ${t('dim_m')}`);
+                            if (v.depth_m) parts.push(`${t('dim_depth')} ${v.depth_m} ${t('dim_m')}`);
+                            if (v.length_m) parts.push(`${t('dim_length')} ${v.length_m} ${t('dim_m')}`);
+                            if (v.width_m) parts.push(`${t('dim_width')} ${v.width_m} ${t('dim_m')}`);
+                            if (v.design_volume_m3) parts.push(`${t('dim_volume')}: ${v.design_volume_m3} ${t('dim_m3')}`);
+                            if (v.volume_liters) parts.push(`${v.volume_liters} ${t('dim_liters')}`);
+                            html += parts.join(', ');
+                            if (v.notes) html += ` — ${v.notes}`;
+                            html += '</li>';
+                        } else {
+                            html += `<li><strong>${k}:</strong> ${String(v)}</li>`;
+                        }
+                    });
+                }
+                html += '</ul>';
+                return html;
+            }
 
-            const recharge_liters = Number(outputs.runoff_generation_liters || analysis.runoff_generation_liters || outputs.recharge_potential || analysis.recharge_potential || 0);
-            const suitability = Number(outputs.suitability_score || analysis.suitability_score || 0);
-            const harvest_demand_ratio = Number(outputs.harvest_demand_ratio || analysis.harvest_demand_ratio || 0);
-            const cost_estimation = Number(outputs.cost_estimation_inr || analysis.cost_estimation_inr || outputs.cost_estimation || 0);
-            const feasibility_raw = outputs.feasibility_check || analysis.feasibility_check || 'Unknown';
-            const suggested_structure = outputs.suggested_structure || analysis.suggested_structure || {type:'N/A', rationale:''};
-            const principal_aquifer = outputs.principal_aquifer || analysis.principal_aquifer || t('small_no_data');
-            const groundwater_depth = outputs.groundwater_depth_m || analysis.groundwater_depth_m || 'N/A';
-            const local_rainfall = outputs.local_rainfall_mm || analysis.local_rainfall_mm || outputs.annual_rainfall_mm_total || 'N/A';
-            const recommended_dimensions = outputs.recommended_dimensions || analysis.structure_dimensions || {};
-            const cost_benefit = outputs.cost_benefit || analysis.cost_benefit || {payback_period_years:'N/A', annual_savings_inr:0};
-            const cost_breakdown = outputs.cost_breakdown || analysis.cost_breakdown || { base_cost_inr: 5000, installation_cost_inr: (Number(document.getElementById('rooftop_area').value)*100 || 9000), storage_cost_inr: 0 };
+            function fmtNumber(v, d = 2) {
+                if (v === null || v === undefined) return t('small_no_data');
+                const n = Number(v);
+                if (Number.isNaN(n)) return String(v);
+                return n.toLocaleString(undefined, { minimumFractionDigits: d, maximumFractionDigits: d });
+            }
 
-            // build HTML
-            const html = `
+            function fmtPaybackYears(value) {
+                if (value === null || value === undefined) return 'N/A';
+                const yrs = t('payback_years') || 'years';
+                return `${value} ${yrs}`;
+            }
+
+            // Render results from the lastAnalysis object (reusable on language change)
+            function renderResultsFromData(lastData) {
+                if (!lastData) return;
+                const outputs = lastData.outputs || {};
+                const analysis = outputs.analysis_results || {};
+
+                const recharge_liters = Number(outputs.runoff_generation_liters || analysis.runoff_generation_liters || outputs.recharge_potential || analysis.recharge_potential || 0);
+                const suitability = Number(outputs.suitability_score || analysis.suitability_score || 0);
+                const harvest_demand_ratio = Number(outputs.harvest_demand_ratio || analysis.harvest_demand_ratio || 0);
+                const cost_estimation = Number(outputs.cost_estimation_inr || analysis.cost_estimation_inr || outputs.cost_estimation || 0);
+                const feasibility_raw = outputs.feasibility_check || analysis.feasibility_check || 'Unknown';
+                const suggested_structure = outputs.suggested_structure || analysis.suggested_structure || { type: 'N/A', rationale: '' };
+                const principal_aquifer = outputs.principal_aquifer || analysis.principal_aquifer || t('small_no_data');
+                const groundwater_depth = outputs.groundwater_depth_m || analysis.groundwater_depth_m || 'N/A';
+                const local_rainfall = outputs.local_rainfall_mm || analysis.local_rainfall_mm || outputs.annual_rainfall_mm_total || 'N/A';
+                const recommended_dimensions = outputs.recommended_dimensions || analysis.structure_dimensions || {};
+                const cost_benefit = outputs.cost_benefit || analysis.cost_benefit || { payback_period_years: 'N/A', annual_savings_inr: 0 };
+                const cost_breakdown = outputs.cost_breakdown || analysis.cost_breakdown || { base_cost_inr: 5000, installation_cost_inr: (Number(document.getElementById('rooftop_area').value) * 100 || 9000), storage_cost_inr: 0 };
+
+                // build HTML
+                const html = `
                 <div class="section-title"><h2>${t('form_title')}</h2><p>${t('form_sub')}</p></div>
                 <div class="results-grid">
                     <div class="result-card">
                         <div class="result-label"><i class="fas fa-recycle"></i> ${t('res_recharge')}</div>
-                        <div class="result-value">${fmtNumber(recharge_liters,2)}</div>
+                        <div class="result-value">${fmtNumber(recharge_liters, 2)}</div>
                         <div class="result-unit">${t('dim_liters')}/year</div>
                         <div class="small-note">${t('note_det_ml')}</div>
                     </div>
 
                     <div class="result-card">
                         <div class="result-label"><i class="fas fa-star"></i> ${t('res_suitability')}</div>
-                        <div class="result-value">${fmtNumber(suitability*100,2)}</div>
+                        <div class="result-value">${fmtNumber(suitability * 100, 2)}</div>
                         <div class="result-unit">/100</div>
                         <div class="small-note">${t('note_higher_better')}</div>
                     </div>
 
                     <div class="result-card">
                         <div class="result-label"><i class="fas fa-balance-scale"></i> ${t('res_harvest_ratio')}</div>
-                        <div class="result-value">${fmtNumber(harvest_demand_ratio,2)}</div>
+                        <div class="result-value">${fmtNumber(harvest_demand_ratio, 2)}</div>
                         <div class="result-unit">Ratio</div>
                         <div class="small-note">${t('note_meet_demand')}</div>
                     </div>
@@ -608,30 +1253,30 @@
 
                     <div class="result-card">
                         <div class="result-label"><i class="fas fa-tachometer-alt"></i> ${t('res_depth')}</div>
-                        <div class="result-value">${fmtNumber(groundwater_depth,1)}</div>
+                        <div class="result-value">${fmtNumber(groundwater_depth, 1)}</div>
                         <div class="result-unit">${t('dim_m')}</div>
                         <div class="small-note">${t('small_no_data')}</div>
                     </div>
 
                     <div class="result-card">
                         <div class="result-label"><i class="fas fa-cloud-showers-heavy"></i> ${t('res_rainfall')}</div>
-                        <div class="result-value">${fmtNumber(local_rainfall,1)}</div>
+                        <div class="result-value">${fmtNumber(local_rainfall, 1)}</div>
                         <div class="result-unit">mm/year</div>
                         <div class="small-note">${t('small_no_data')}</div>
                     </div>
 
                     <div class="result-card">
                         <div class="result-label"><i class="fas fa-calculator"></i> ${t('res_cost_est')}</div>
-                        <div class="result-value">Rs. ${fmtNumber(cost_estimation,2)}</div>
+                        <div class="result-value">Rs. ${fmtNumber(cost_estimation, 2)}</div>
                         <div class="small-note">${t('small_no_data')}</div>
                     </div>
 
                     <div class="result-card">
                         <div class="result-label"><i class="fas fa-wallet"></i> ${t('res_cost_break')}</div>
                         <div class="small-note" style="margin-top:8px;font-size:13px;">
-                            ${t('base_cost')}: Rs. ${fmtNumber(cost_breakdown.base_cost_inr || 0,2)}<br>
-                            ${t('install_cost')}: Rs. ${fmtNumber(cost_breakdown.installation_cost_inr || 0,2)}<br>
-                            ${t('storage_cost')}: Rs. ${fmtNumber(cost_breakdown.storage_cost_inr || 0,2)}
+                            ${t('base_cost')}: Rs. ${fmtNumber(cost_breakdown.base_cost_inr || 0, 2)}<br>
+                            ${t('install_cost')}: Rs. ${fmtNumber(cost_breakdown.installation_cost_inr || 0, 2)}<br>
+                            ${t('storage_cost')}: Rs. ${fmtNumber(cost_breakdown.storage_cost_inr || 0, 2)}
                         </div>
                     </div>
 
@@ -643,7 +1288,7 @@
 
                     <div class="result-card">
                         <div class="result-label"><i class="fas fa-stream"></i> ${t('res_runoff_gen')}</div>
-                        <div class="result-value">${fmtNumber(recharge_liters/1000,2)}</div>
+                        <div class="result-value">${fmtNumber(recharge_liters / 1000, 2)}</div>
                         <div class="result-unit">${t('dim_m3')}/year</div>
                         <div class="small-note">${t('small_no_data')}</div>
                     </div>
@@ -651,7 +1296,7 @@
                     <div class="result-card">
                         <div class="result-label"><i class="fas fa-calculator"></i> ${t('res_cost_benefit')}</div>
                         <div class="result-value">${fmtPaybackYears(cost_benefit.payback_period_years)}</div>
-                        <div class="result-unit">${t('annual_savings_prefix')}: Rs. ${fmtNumber(cost_benefit.annual_savings_inr || 0,2)}</div>
+                        <div class="result-unit">${t('annual_savings_prefix')}: Rs. ${fmtNumber(cost_benefit.annual_savings_inr || 0, 2)}</div>
                         <div class="small-note">${t('small_no_data')}</div>
                     </div>
 
@@ -668,111 +1313,129 @@
                     </div>
                 </div>
             `;
-            document.getElementById('results-container').innerHTML = html;
-            document.getElementById('results').classList.add('active');
-            document.getElementById('results').scrollIntoView({behavior:'smooth'});
-        }
+                document.getElementById('results-container').innerHTML = html;
+                document.getElementById('results').classList.add('active');
+                document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+            }
 
-        // small helper to interpret feasibility text
-        function translateFeasibility(feas) {
-            if (!feas) return t('small_no_data');
-            const s = String(feas).toLowerCase();
-            if (s.includes('feas') || s.includes('true') || s.includes('yes')) return t('feasible');
-            if (s.includes('not') || s.includes('no') || s.includes('not recommended')) return t('not_recommended');
-            return feas;
-        }
+            // small helper to interpret feasibility text
+            function translateFeasibility(feas) {
+                if (!feas) return t('small_no_data');
+                const s = String(feas).toLowerCase();
+                if (s.includes('feas') || s.includes('true') || s.includes('yes')) return t('feasible');
+                if (s.includes('not') || s.includes('no') || s.includes('not recommended')) return t('not_recommended');
+                return feas;
+            }
 
-        // small rationale translator / generator
-        function translateRationale(suggested_structure, harvest_liters, harvest_demand_ratio) {
-            if (!suggested_structure) return '';
-            const type = (suggested_structure.type || suggested_structure).toString();
-            if (type.toLowerCase().includes('storage')) return t('storage_tank_text');
-            if (type.toLowerCase().includes('pit') || type.toLowerCase().includes('trench')) return t('note_det_ml');
-            if (type.toLowerCase().includes('well')) return t('note_det_ml');
-            return suggested_structure.rationale || '';
-        }
+            // small rationale translator / generator
+            function translateRationale(suggested_structure, harvest_liters, harvest_demand_ratio) {
+                if (!suggested_structure) return '';
+                const type = (suggested_structure.type || suggested_structure).toString();
+                if (type.toLowerCase().includes('storage')) return t('storage_tank_text');
+                if (type.toLowerCase().includes('pit') || type.toLowerCase().includes('trench')) return t('note_det_ml');
+                if (type.toLowerCase().includes('well')) return t('note_det_ml');
+                return suggested_structure.rationale || '';
+            }
 
-        // ---------- wire language controls ----------
-        function wireLangControls() {
-            document.getElementById('lang-en').addEventListener('click', () => { currentLang='en'; applyStaticTranslations(); if (window.lastAnalysis) renderResultsFromData(window.lastAnalysis); });
-            document.getElementById('lang-hi').addEventListener('click', () => { currentLang='hi'; applyStaticTranslations(); if (window.lastAnalysis) renderResultsFromData(window.lastAnalysis); });
-            document.getElementById('lang-local').addEventListener('click', () => { currentLang='local'; applyStaticTranslations(); if (window.lastAnalysis) renderResultsFromData(window.lastAnalysis); });
-        }
+            // ---------- wire language controls ----------
+            function wireLangControls() {
+                document.getElementById('lang-en').addEventListener('click', () => { currentLang = 'en'; applyStaticTranslations(); if (window.lastAnalysis) renderResultsFromData(window.lastAnalysis); });
+                document.getElementById('lang-hi').addEventListener('click', () => { currentLang = 'hi'; applyStaticTranslations(); if (window.lastAnalysis) renderResultsFromData(window.lastAnalysis); });
+                document.getElementById('lang-local').addEventListener('click', () => { currentLang = 'local'; applyStaticTranslations(); if (window.lastAnalysis) renderResultsFromData(window.lastAnalysis); });
+            }
 
-        // ---------- form submit & backend call ----------
-        function wireForm() {
-            const form = document.getElementById('prediction-form');
-            const submitButton = document.getElementById('submit-button');
-            form.addEventListener('submit', async (ev) => {
-                ev.preventDefault();
-                submitButton.disabled = true;
-                submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ' + (t('btn_calculate') || 'Calculating...');
+            // ---------- form submit & backend call ----------
+            function wireForm() {
+                const form = document.getElementById('prediction-form');
+                const submitButton = document.getElementById('submit-button');
+                const calculationTimeDiv = document.getElementById('calculation-time');
+                form.addEventListener('submit', async (ev) => {
+                    ev.preventDefault();
+                    submitButton.disabled = true;
+                    submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ' + (t('btn_calculate') || 'Calculating...');
+                    if (calculationTimeDiv) calculationTimeDiv.textContent = '';
 
-                // geolocation if possible
-                let latitude = null, longitude = null;
-                try {
-                    const pos = await new Promise((resolve, reject) => {
-                        if (!navigator.geolocation) return reject('no geolocation');
-                        navigator.geolocation.getCurrentPosition(resolve, reject, {timeout:3000});
-                    });
-                    latitude = pos.coords.latitude; longitude = pos.coords.longitude;
-                } catch (e) {
-                    // let backend use defaults
-                }
+                    // geolocation if possible
+                    let latitude = null, longitude = null;
+                    try {
+                        const pos = await new Promise((resolve, reject) => {
+                            if (!navigator.geolocation) return reject('no geolocation');
+                            navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 3000 });
+                        });
+                        latitude = pos.coords.latitude; longitude = pos.coords.longitude;
+                    } catch (e) {
+                        // let backend use defaults
+                    }
 
-                const formData = {
-                    rooftop_area: parseFloat(document.getElementById('rooftop_area').value),
-                    dwellers: parseInt(document.getElementById('dwellers').value,10),
-                    roof_material: document.getElementById('roof_material').value,
-                    latitude: latitude,
-                    longitude: longitude,
-                    roof_polygon: window._last_polygon ? window._last_polygon.geojson : null
-                };
+                    const formData = {
+                        rooftop_area: parseFloat(document.getElementById('rooftop_area').value),
+                        dwellers: parseInt(document.getElementById('dwellers').value, 10),
+                        roof_material: document.getElementById('roof_material').value,
+                        latitude: latitude,
+                        longitude: longitude,
+                        roof_polygon: window._last_polygon ? window._last_polygon.geojson : null
+                    };
 
-                let data;
-                try {
-                    const resp = await fetch('/analyze', {
-                        method: 'POST',
-                        headers: {'Content-Type':'application/json'},
-                        body: JSON.stringify(formData)
-                    });
-                    if (!resp.ok) throw new Error('HTTP ' + resp.status);
-                    data = await resp.json();
-                } catch (err) {
-                    document.getElementById('results-container').innerHTML = `<div class="section-title"><h2>${t('small_no_data')}</h2><p>${err.message || err}</p></div>`;
-                    document.getElementById('results').classList.add('active');
+                    let data;
+                    try {
+                        const resp = await fetch('/analyze', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(formData)
+                        });
+                        if (!resp.ok) throw new Error('HTTP ' + resp.status);
+                        data = await resp.json();
+                    } catch (err) {
+                        document.getElementById('results-container').innerHTML = `<div class="section-title"><h2>${t('small_no_data')}</h2><p>${err.message || err}</p></div>`;
+                        document.getElementById('results').classList.add('active');
+                        submitButton.disabled = false;
+                        submitButton.innerHTML = '<i class="fas fa-calculator"></i> ' + (t('btn_calculate') || 'Calculate Prediction');
+                        if (calculationTimeDiv) calculationTimeDiv.textContent = '';
+                        return;
+                    }
+
+                    // store lastAnalysis so language switches can re-render
+                    window.lastAnalysis = data;
+                    // render results
+                    try {
+                        renderResultsFromData(window.lastAnalysis);
+                    } catch (e) {
+                        document.getElementById('results-container').innerHTML = `<div class="section-title"><h2>${t('small_no_data')}</h2><p>Display error: ${e.message || e}</p></div>`;
+                        document.getElementById('results').classList.add('active');
+                    }
+
+                    // Show calculation time if present
+                    if (calculationTimeDiv) {
+                        if (data && typeof data.calculation_time_sec !== 'undefined' && data.calculation_time_sec !== null) {
+                            const secs = Number(data.calculation_time_sec);
+                            if (!isNaN(secs)) {
+                                calculationTimeDiv.textContent = `Prediction calculated in ${secs.toFixed(2)} sec`;
+                            } else {
+                                calculationTimeDiv.textContent = '';
+                            }
+                        } else {
+                            calculationTimeDiv.textContent = '';
+                        }
+                    }
+
                     submitButton.disabled = false;
                     submitButton.innerHTML = '<i class="fas fa-calculator"></i> ' + (t('btn_calculate') || 'Calculate Prediction');
-                    return;
-                }
+                });
+            }
 
-                // store lastAnalysis so language switches can re-render
-                window.lastAnalysis = data;
-                // render results
-                try {
-                    renderResultsFromData(window.lastAnalysis);
-                } catch (e) {
-                    document.getElementById('results-container').innerHTML = `<div class="section-title"><h2>${t('small_no_data')}</h2><p>Display error: ${e.message || e}</p></div>`;
-                    document.getElementById('results').classList.add('active');
-                }
-
-                submitButton.disabled = false;
-                submitButton.innerHTML = '<i class="fas fa-calculator"></i> ' + (t('btn_calculate') || 'Calculate Prediction');
+            // ---------- boot sequence ----------
+            document.addEventListener('DOMContentLoaded', async () => {
+                await detectLocalLanguage();
+                applyStaticTranslations();
+                wireLangControls();
+                initMap();
+                wireForm();
             });
-        }
 
-        // ---------- boot sequence ----------
-        document.addEventListener('DOMContentLoaded', async () => {
-            await detectLocalLanguage();
-            applyStaticTranslations();
-            wireLangControls();
-            initMap();
-            wireForm();
-        });
-
-    })();
+        })();
     </script>
 
     <script type="module" src="https://unpkg.com/@splinetool/viewer@1.10.71/build/spline-viewer.js"></script>
 </body>
+
 </html>

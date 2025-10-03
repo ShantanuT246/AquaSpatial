@@ -4,6 +4,7 @@ import traceback
 from pathlib import Path
 import concurrent.futures
 from typing import Dict, Any, Tuple, Optional
+from functools import lru_cache
 
 # --- Flask and CORS Setup ---
 from flask import Flask, request, jsonify
@@ -25,15 +26,31 @@ sys.path.insert(0, str(ML_DIR))
 
 # ---- Module Imports ----
 try:
-    from backend.drainage_density import compute_drainage_density
-    from backend.get_rainfall import get_rainfall_data
-    from backend.get_soil import get_soil_type
-    from backend.runoff_coeff import get_runoff_coefficient_strict
+    from backend.drainage_density import compute_drainage_density as original_compute_drainage_density
+    from backend.get_rainfall import get_rainfall_data as original_get_rainfall_data
+    from backend.get_soil import get_soil_type as original_get_soil_type
+    from backend.runoff_coeff import get_runoff_coefficient_strict as original_get_runoff_coefficient_strict
     from ML.main import RTRWHPredictor
     import joblib
 except ImportError as e:
     print(f"FATAL: A required module could not be imported. Please check your installation and paths. Details: {e}", file=sys.stderr)
     sys.exit(1)
+
+@lru_cache(maxsize=1000)
+def compute_drainage_density(lat: float, lon: float, verbose: bool = False) -> Any:
+    return original_compute_drainage_density(lat=lat, lon=lon, verbose=verbose)
+
+@lru_cache(maxsize=1000)
+def get_rainfall_data(lat: float, lon: float) -> Any:
+    return original_get_rainfall_data(lat=lat, lon=lon)
+
+@lru_cache(maxsize=1000)
+def get_soil_type(lat: float, lon: float) -> Any:
+    return original_get_soil_type(lat=lat, lon=lon)
+
+@lru_cache(maxsize=1000)
+def get_runoff_coefficient_strict(roof_type: str) -> Any:
+    return original_get_runoff_coefficient_strict(roof_type=roof_type)
 
 # ---- Default Paths & Global Predictor ----
 SOIL_TIF_PATH = str(DATASETS_DIR / "SOILTEXTURE.tif")
@@ -76,21 +93,16 @@ def run_task(func, key, **kwargs):
 
 def run_aqua_spatial_analysis(data: Dict[str, Any]) -> Dict[str, Any]:
     """
-    Orchestrates the analysis by running tasks in parallel and then the ML prediction.
+    Orchestrates the analysis by running tasks sequentially and then the ML prediction.
     This function is adapted from your original `main` function.
     """
     results: Dict[str, Any] = {}
 
-    # 1. Run I/O-Bound Tasks in Parallel
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        futures = [
-            executor.submit(run_task, compute_drainage_density, "drainage_density_km_per_km2", lat=data["latitude"], lon=data["longitude"], verbose=False),
-            executor.submit(run_task, get_rainfall_data, "annual_rainfall_mm_total", lat=data["latitude"], lon=data["longitude"]),
-            executor.submit(run_task, get_soil_type, "soil_description", lat=data["latitude"], lon=data["longitude"]),
-            executor.submit(run_task, get_runoff_coefficient_strict, "runoff_coefficient", roof_type=data["roof_material"]),
-        ]
-        for future in concurrent.futures.as_completed(futures):
-            results.update(future.result())
+    # 1. Run I/O-Bound Tasks Sequentially
+    results.update(run_task(compute_drainage_density, "drainage_density_km_per_km2", lat=data["latitude"], lon=data["longitude"], verbose=False))
+    results.update(run_task(get_rainfall_data, "annual_rainfall_mm_total", lat=data["latitude"], lon=data["longitude"]))
+    results.update(run_task(get_soil_type, "soil_description", lat=data["latitude"], lon=data["longitude"]))
+    results.update(run_task(get_runoff_coefficient_strict, "runoff_coefficient", roof_type=data["roof_material"]))
 
     # 2. Run CPU-Bound ML Prediction
     if ML_PREDICTOR:
@@ -155,10 +167,10 @@ def predict():
     usd_to_inr_rate = 83.5 
 
     formatted_response = {
-        "rechargePotential": f"{(ml_results.get('recharge_potential_m3_per_year', 0) * 1000):.2f}",
-        "suitabilityScore": f"{ml_results.get('suitability_score', 0):.3f}",
-        "harvestDemandRatio": f"{ml_results.get('harvest_demand_ratio', 0):.3f}",
-        "costEstimation": f"{(ml_results.get('cost_estimation_usd', 0) * usd_to_inr_rate):.2f}",
+        "rechargePotential": (ml_results.get('recharge_potential_m3_per_year', 0) * 1000),
+        "suitabilityScore": ml_results.get('suitability_score', 0),
+        "harvestDemandRatio": ml_results.get('harvest_demand_ratio', 0),
+        "costEstimation": (ml_results.get('cost_estimation_usd', 0) * usd_to_inr_rate),
         "latitude": inputs["latitude"],
         "longitude": inputs["longitude"]
     }
@@ -169,4 +181,4 @@ def predict():
 if __name__ == '__main__':
     load_ml_predictor_on_startup()  # Load the model before starting the server
     # Use host='0.0.0.0' to make it accessible on your local network
-    app.run(debug=True, host='0.0.0.0')
+    app.run(debug=False, host='0.0.0.0')
