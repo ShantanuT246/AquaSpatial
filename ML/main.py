@@ -49,7 +49,11 @@ class Predictor:
         if self.scaler is None:
             raise ValueError("Scaler not loaded")
 
-        cat_enc = self.encoder.transform(cat).toarray()
+        cat_enc_sparse = self.encoder.transform(cat)
+        if hasattr(cat_enc_sparse, "toarray"):
+            cat_enc = cat_enc_sparse.toarray()
+        else:
+            cat_enc = cat_enc_sparse
         num_scaled = self.scaler.transform(num)
         X = np.concatenate([num_scaled, cat_enc], axis=1)
         return X

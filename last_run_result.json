@@ -3,136 +3,136 @@
         "rooftop_area": 90,
         "dwellers": 2,
         "roof_material": "metal",
-        "longitude": 79.1635026968653,
-        "latitude": 12.973296578004181,
+        "longitude": 88.3639,
+        "latitude": 22.5726,
         "model_dir": "/Users/shantanutapole/Documents/Projects/AquaSpatial/ML/models"
     },
     "outputs": {
         "principal_aquifer": "Alluvial Aquifer System",
-        "groundwater_depth_m": 22.2,
+        "groundwater_depth_m": 12.1,
         "runoff_coefficient": 0.95,
-        "soil_description": "other",
-        "annual_rainfall_mm_total": 1147.24,
-        "drainage_density_km_per_km2": 0.2003904000853878,
+        "soil_description": "loamy",
+        "annual_rainfall_mm_total": 1518.1,
+        "drainage_density_km_per_km2": 0.20791642492121953,
         "ml_load_status": "ML predictor loaded successfully.",
         "rainfall_data_status": "Actual data received",
         "ml_prediction_error": "Predictor failure: 'numpy.ndarray' object has no attribute 'toarray'",
-        "deterministic_runoff_liters": 98089.02,
-        "deterministic_runoff_m3": 98.089,
-        "ml_adjusted_liters": 98089.02,
-        "ml_adjusted_m3": 98.089,
-        "runoff_generation_liters": 98089.02,
-        "runoff_generation_m3": 98.089,
+        "deterministic_runoff_liters": 129797.55,
+        "deterministic_runoff_m3": 129.798,
+        "ml_adjusted_liters": 129797.55,
+        "ml_adjusted_m3": 129.798,
+        "runoff_generation_liters": 129797.55,
+        "runoff_generation_m3": 129.798,
         "suggested_structure": {
-            "type": "Storage Tank",
-            "rationale": "High demand relative to harvested volume \u2014 storage recommended. Harvest volume \u2248 98.09 m\u00b3/year; annual demand \u2248 98.55 m\u00b3/year."
+            "type": "Recharge Pit / Trench",
+            "rationale": "Permeable soil and shallow aquifer make direct recharge effective. Harvest volume \u2248 129.80 m\u00b3/year; annual demand \u2248 98.55 m\u00b3/year."
         },
         "recommended_dimensions": {
             "recharge_pit": {
                 "type": "Recharge Pit",
-                "design_volume_m3": 24.522,
+                "design_volume_m3": 32.449,
                 "depth_m": 2.5,
-                "diameter_m": 3.53,
+                "diameter_m": 4.07,
                 "notes": "Pit sizing uses V = \u03c0 r\u00b2 h, recommended depth \u2248 2.5 m (adjust locally)."
             },
             "recharge_trench": {
                 "type": "Recharge Trench",
-                "design_volume_m3": 24.522,
+                "design_volume_m3": 32.449,
                 "width_m": 0.6,
                 "depth_m": 0.6,
-                "length_m": 68.12,
+                "length_m": 90.14,
                 "notes": "Trench sizing uses V = L * W * D. Adjust width/depth to site constraints."
             },
             "recharge_shaft": {
                 "type": "Recharge Shaft",
-                "design_volume_m3": 24.522,
+                "design_volume_m3": 32.449,
                 "depth_m": 3.0,
-                "diameter_m": 3.23,
+                "diameter_m": 3.71,
                 "notes": "Shaft sizing approximated; final design must consider borehole yield."
             },
             "storage_tank": {
                 "type": "Storage Tank",
-                "volume_m3": 24.522,
-                "volume_liters": 24522,
+                "volume_m3": 32.449,
+                "volume_liters": 32449,
                 "notes": "Use when direct recharge not favorable; consider overflow & first-flush."
             }
         },
         "feasibility_check": "Feasible",
-        "suitability_score": 0.648,
-        "harvest_demand_ratio": 0.995,
-        "cost_estimation_inr": 72853.41,
+        "suitability_score": 0.7746,
+        "harvest_demand_ratio": 1.317,
+        "cost_estimation_inr": 92598.53,
         "cost_breakdown": {
             "base_cost_inr": 5000.0,
-            "installation_cost_inr": 9000.0,
+            "installation_cost_inr": 9720.0,
             "installation_rate_per_m2_inr": 100.0,
-            "storage_cost_inr": 58853.41,
+            "storage_cost_inr": 77878.53,
             "storage_cost_per_m3_inr": 1200.0,
-            "soil_multiplier": 1.0,
-            "desired_storage_m3": 49.045,
+            "soil_multiplier": 1.08,
+            "desired_storage_m3": 64.899,
             "note": "Breakdown is heuristic. Use for quick estimates; refine with local vendor quotes."
         },
         "cost_benefit": {
-            "payback_period_years": 14.9,
-            "annual_savings_inr": 4904.45,
+            "payback_period_years": 14.3,
+            "annual_savings_inr": 6489.88,
             "assumption_water_cost_per_m3_inr": 50.0
         },
-        "local_rainfall_mm": 1147.2,
+        "local_rainfall_mm": 1518.1,
         "analysis_results": {
             "feasibility_check": "Feasible",
-            "runoff_generation_liters": 98089.02,
-            "runoff_generation_m3": 98.089,
-            "suitability_score": 0.648,
-            "cost_estimation_inr": 72853.41,
+            "runoff_generation_liters": 129797.55,
+            "runoff_generation_m3": 129.798,
+            "suitability_score": 0.7746,
+            "cost_estimation_inr": 92598.53,
             "cost_breakdown": {
                 "base_cost_inr": 5000.0,
-                "installation_cost_inr": 9000.0,
+                "installation_cost_inr": 9720.0,
                 "installation_rate_per_m2_inr": 100.0,
-                "storage_cost_inr": 58853.41,
+                "storage_cost_inr": 77878.53,
                 "storage_cost_per_m3_inr": 1200.0,
-                "soil_multiplier": 1.0,
-                "desired_storage_m3": 49.045,
+                "soil_multiplier": 1.08,
+                "desired_storage_m3": 64.899,
                 "note": "Breakdown is heuristic. Use for quick estimates; refine with local vendor quotes."
             },
             "suggested_structure": {
-                "type": "Storage Tank",
-                "rationale": "High demand relative to harvested volume \u2014 storage recommended. Harvest volume \u2248 98.09 m\u00b3/year; annual demand \u2248 98.55 m\u00b3/year."
+                "type": "Recharge Pit / Trench",
+                "rationale": "Permeable soil and shallow aquifer make direct recharge effective. Harvest volume \u2248 129.80 m\u00b3/year; annual demand \u2248 98.55 m\u00b3/year."
             },
             "structure_dimensions": {
                 "recharge_pit": {
                     "type": "Recharge Pit",
-                    "design_volume_m3": 24.522,
+                    "design_volume_m3": 32.449,
                     "depth_m": 2.5,
-                    "diameter_m": 3.53,
+                    "diameter_m": 4.07,
                     "notes": "Pit sizing uses V = \u03c0 r\u00b2 h, recommended depth \u2248 2.5 m (adjust locally)."
                 },
                 "recharge_trench": {
                     "type": "Recharge Trench",
-                    "design_volume_m3": 24.522,
+                    "design_volume_m3": 32.449,
                     "width_m": 0.6,
                     "depth_m": 0.6,
-                    "length_m": 68.12,
+                    "length_m": 90.14,
                     "notes": "Trench sizing uses V = L * W * D. Adjust width/depth to site constraints."
                 },
                 "recharge_shaft": {
                     "type": "Recharge Shaft",
-                    "design_volume_m3": 24.522,
+                    "design_volume_m3": 32.449,
                     "depth_m": 3.0,
-                    "diameter_m": 3.23,
+                    "diameter_m": 3.71,
                     "notes": "Shaft sizing approximated; final design must consider borehole yield."
                 },
                 "storage_tank": {
                     "type": "Storage Tank",
-                    "volume_m3": 24.522,
-                    "volume_liters": 24522,
+                    "volume_m3": 32.449,
+                    "volume_liters": 32449,
                     "notes": "Use when direct recharge not favorable; consider overflow & first-flush."
                 }
             },
             "principal_aquifer": "Alluvial Aquifer System",
-            "groundwater_depth_m": 22.2,
-            "local_rainfall_mm": 1147.2,
+            "groundwater_depth_m": 12.1,
+            "local_rainfall_mm": 1518.1,
             "cost_benefit": {
-                "payback_period_years": 14.9,
-                "annual_savings_inr": 4904.45,
+                "payback_period_years": 14.3,
+                "annual_savings_inr": 6489.88,
                 "assumption_water_cost_per_m3_inr": 50.0
             }
         }

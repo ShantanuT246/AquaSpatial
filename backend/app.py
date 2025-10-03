@@ -445,12 +445,18 @@ def analyze_endpoint():
         results = run_analysis(request_data)
         end_time = time.time()
         elapsed = end_time - start_time
-        # Add calculation time to the JSON response, rounded to 2 decimal places
         results['calculation_time_sec'] = round(elapsed, 2)
         return jsonify(results)
     except Exception as e:
-        print(f"An error occurred during analysis: {e}\n{traceback.format_exc()}", file=sys.stderr)
-        return jsonify({"error": "An internal server error occurred."}), 500
+        import traceback
+        err_trace = traceback.format_exc()
+        print(f"ANALYZE ERROR: {e}\n{err_trace}", file=sys.stderr)
+        # Return full error temporarily for debugging
+        return jsonify({
+            "error": str(e),
+            "traceback": err_trace,
+            "calculation_time_sec": 0
+        }), 500
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
