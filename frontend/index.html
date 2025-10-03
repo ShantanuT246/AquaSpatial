@@ -1378,7 +1378,7 @@
 
                     let data;
                     try {
-                        const resp = await fetch('/analyze', {
+                        const resp = await fetch('https://aquaspatial.onrender.com/analyze', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify(formData)
