@@ -1,0 +1,46 @@
+api/
+├─ static/
+├─ templates/
+│  └─ index.html
+└─ app.py
+backend/
+├─ __pycache__/
+│  ├─ app.cpython-313.pyc
+│  ├─ drainage_density.cpython-313.pyc
+│  ├─ get_rainfall.cpython-311.pyc
+│  ├─ get_rainfall.cpython-313.pyc
+│  ├─ get_soil.cpython-313.pyc
+│  └─ runoff_coeff.cpython-313.pyc
+├─ models/
+├─ api_gw.py
+├─ drainage_density.py
+├─ get_rainfall.py
+├─ get_soil.py
+├─ gw_depth.py
+├─ requirements.txt
+└─ runoff_coeff.py
+frontend/
+├─ static/
+│  ├─ images/
+│  │  └─ aquaspatial_logo.svg
+│  └─ aquaspatial_logo2.svg
+├─ app.py
+├─ output.html
+└─ predict.html
+ML/
+├─ __pycache__/
+│  └─ main.cpython-313.pyc
+├─ models/
+│  ├─ encoder.pkl
+│  ├─ residual_xgb.joblib
+│  └─ scaler.pkl
+├─ .env
+├─ dataset.py
+├─ encoder.pkl
+├─ main.py
+├─ model.pth
+├─ requirements.txt
+├─ scaler.pkl
+├─ synthetic_dataset.csv
+└─ target_scaler.pkl
+
