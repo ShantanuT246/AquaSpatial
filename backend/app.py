@@ -434,6 +434,10 @@ CORS(app)
 def home():
     return render_template("index.html")
 
+@app.route("/test")
+def test():
+    return "Flask is running!"
+
 import time
 
 @app.route('/analyze', methods=['POST'])
