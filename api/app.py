@@ -425,8 +425,8 @@ frontend_dir = (ROOT / "frontend").resolve()
 static_dir = (frontend_dir / "static").resolve()
 app = Flask(
     __name__,
-    template_folder=str(frontend_dir),
-    static_folder=str(static_dir)
+    template_folder="templates",
+    static_folder="static"
 )
 CORS(app)
 
